@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Proveedor extends Model
 {
+    protected $table = 'proveedor';
+    
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
