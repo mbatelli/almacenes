@@ -5,15 +5,13 @@ namespace App\Almacenes\Model;
 use Illuminate\Database\Eloquent\Model;
 
 
-class Ciudad extends Model
+class Proveedor extends Model
 {
-    protected $table = 'ciudad';
-
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function provinciaId()
+    public function ciudadId()
     {
-        return $this->belongsTo('App\Almacenes\Model\Provincia');
+        return $this->belongsTo('App\Almacenes\Model\Ciudad');
     }
 }
