@@ -28,7 +28,7 @@ return [
     */
 
     'controllers' => [
-        'namespace' => 'TCG\\Voyager\\Http\\Controllers',
+        'namespace' => 'App\\Http\\Controllers\\Voyager',
     ],
 
     /*
@@ -181,7 +181,7 @@ return [
         'add_menu_item' => true,
 
         // which menu add item to
-        'default_menu' => 'admin',
+        'default_menu' => 'almacenes',
 
         // When a BREAD is added, create the related Permission.
         'add_permission' => true,
