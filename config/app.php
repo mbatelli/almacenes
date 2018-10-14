@@ -173,6 +173,11 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        /*
+         * Localization Service Providers...
+         */
+        Laraveles\Spanish\SpanishServiceProvider::class,
+
     ],
 
     /*
