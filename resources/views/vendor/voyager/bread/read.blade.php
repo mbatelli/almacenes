@@ -7,7 +7,7 @@
         <i class="{{ $dataType->icon }}"></i> {{ __('voyager::generic.viewing') }} {{ ucfirst($dataType->display_name_singular) }} &nbsp;
 
         @can('edit', $dataTypeContent)
-            <a href="{{ route('voyager.'.$dataType->slug.'.edit', $dataTypeContent->getKey()) }}" class="btn btn-info">
+            <a href="{{ route($dataType->slug.'.edit', $dataTypeContent->getKey()) }}" class="btn btn-info">
                 <span class="glyphicon glyphicon-pencil"></span>&nbsp;
                 {{ __('voyager::generic.edit') }}
             </a>
@@ -18,7 +18,7 @@
             </a>
         @endcan
 
-        <a href="{{ route('voyager.'.$dataType->slug.'.index') }}" class="btn btn-warning">
+        <a href="{{ route($dataType->slug.'.index') }}" class="btn btn-warning">
             <span class="glyphicon glyphicon-list"></span>&nbsp;
             {{ __('voyager::generic.return_to_list') }}
         </a>
@@ -146,7 +146,7 @@
                     <h4 class="modal-title"><i class="voyager-trash"></i> {{ __('voyager::generic.delete_question') }} {{ strtolower($dataType->display_name_singular) }}?</h4>
                 </div>
                 <div class="modal-footer">
-                    <form action="{{ route('voyager.'.$dataType->slug.'.index') }}" id="delete_form" method="POST">
+                    <form action="{{ route($dataType->slug.'.index') }}" id="delete_form" method="POST">
                         {{ method_field('DELETE') }}
                         {{ csrf_field() }}
                         <input type="submit" class="btn btn-danger pull-right delete-confirm"

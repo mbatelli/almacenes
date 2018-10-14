@@ -10,13 +10,13 @@
                     <li class="active"><i class="voyager-boat"></i> {{ __('voyager::generic.dashboard') }}</li>
                 @else
                     <li class="active">
-                        <a href="{{ route('voyager.dashboard')}}"><i class="voyager-boat"></i> {{ __('voyager::generic.dashboard') }}</a>
+                        <a href="/"><i class="voyager-boat"></i> {{ __('voyager::generic.dashboard') }}</a>
                     </li>
                 @endif
                 <?php $breadcrumb_url = url(''); ?>
                 @for($i = 1; $i <= count(Request::segments()); $i++)
                     <?php $breadcrumb_url .= '/' . Request::segment($i); ?>
-                    @if(Request::segment($i) != ltrim(route('voyager.dashboard', [], false), '/') && !is_numeric(Request::segment($i)))
+                    @if(Request::segment($i) != '/' && !is_numeric(Request::segment($i)))
 
                         @if($i < count(Request::segments()) & $i > 0 && array_search('database',Request::segments())===false)
                             <li class="active"><a
