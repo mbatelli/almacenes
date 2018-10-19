@@ -6,5 +6,8 @@ use TCG\Voyager\Http\Controllers\VoyagerController as BaseVoyagerController;
 
 class VoyagerController extends BaseVoyagerController
 {
-    //
+    public function profileSite()
+    {
+        return view('profile');
+    }
 }

@@ -16,8 +16,8 @@ Route::get('/', 'HomeController@index')->name('home');
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-$namespacePrefix = '\\'.config('voyager.controllers.namespace').'\\';
 
+$namespacePrefix = '\\'.config('voyager.controllers.namespace').'\\';
 try {
     foreach (DataType::all() as $dataType) {
         $breadController = $dataType->controller
@@ -34,8 +34,7 @@ try {
     // do nothing, might just be because table not yet migrated.
 }
 
-
-//Route::resource('categoria', 'Voyager\\VoyagerBaseController');
+Route::get('profile_site', ['uses' => $namespacePrefix.'VoyagerController@profileSite', 'as' => 'profile_site']);
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();

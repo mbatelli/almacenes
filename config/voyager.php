@@ -159,6 +159,23 @@ return [
             ],
         ],
 
+        'navbar_items_site' => [
+            'Perfil' => [
+                'route'      => '/profile_site',
+                'classes'    => 'class-full-of-rum',
+                'icon_class' => 'voyager-person',
+            ],
+            'Inicio' => [
+                'route'        => '/',
+                'icon_class'   => 'voyager-home',
+                'target_blank' => true,
+            ],
+            'Salir' => [
+                'route'      => 'voyager.logout',
+                'icon_class' => 'voyager-power',
+            ],
+        ],
+
         'widgets' => [
             'TCG\\Voyager\\Widgets\\UserDimmer',
             'TCG\\Voyager\\Widgets\\PostDimmer',
