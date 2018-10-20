@@ -10,6 +10,7 @@ return [
     'are_you_sure'           => 'Estás seguro',
     'are_you_sure_delete'    => 'Estás seguro que quieres borrarlo',
     'auto_increment'         => 'Autoincremento',
+    'bread'                  => 'BREAD',
     'browse'                 => 'Navegar',
     'builder'                => 'Constructor',
     'bulk_delete'            => 'Borrado masivo',
