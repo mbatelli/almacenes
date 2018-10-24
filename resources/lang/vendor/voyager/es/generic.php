@@ -23,7 +23,7 @@ return [
     'compass'                => 'Compás',
     'created_at'             => 'Creado en',
     'custom'                 => 'Personalizado',
-    'dashboard'              => 'Tablero',
+    'dashboard'              => 'Inicio',
     'database'               => 'Base de datos',
     'default'                => 'Defecto',
     'delete'                 => 'Borrar',

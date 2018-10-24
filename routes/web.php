@@ -17,6 +17,9 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::resource('orden-compra', 'OrdenCompraController');
+Route::get('orden-compra-linea', 'OrdenCompraController@ordenCompraLinea');
+
 $namespacePrefix = '\\'.config('voyager.controllers.namespace').'\\';
 try {
     foreach (DataType::all() as $dataType) {

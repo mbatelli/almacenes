@@ -178,6 +178,8 @@ return [
          */
         Laraveles\Spanish\SpanishServiceProvider::class,
 
+        Yajra\DataTables\DataTablesServiceProvider::class,
+
     ],
 
     /*
