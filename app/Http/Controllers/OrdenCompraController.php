@@ -15,6 +15,8 @@ use App\Http\Controllers\Voyager\VoyagerBaseController;
 use App\DataTables\OrdenCompraLineasDataTable;
 use Yajra\DataTables\DataTables;
 use App\Almacenes\Model\OrdenCompraLinea;
+use App\Almacenes\Model\OrdenCompra;
+use App\Almacenes\Model\Articulo;
 
 class OrdenCompraController extends VoyagerBaseController
 {
@@ -55,7 +57,7 @@ class OrdenCompraController extends VoyagerBaseController
             $view = "voyager::$slug.edit-add";
         }
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'id'));
+        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
     }
 
     public function create(Request $request)
@@ -91,15 +93,44 @@ class OrdenCompraController extends VoyagerBaseController
         return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
     }
 
-    public function ordenCompraLinea(Request $request)
+    public function ordenCompraLinea(Request $request, DataTables $dataTables)
     {
         $ordenCompraId = $request->input('orden_compra_id');
-        return Datatables::of(OrdenCompraLinea::query())
-                    ->addColumn('action', function ($ordenCompra) {
-                        return '<a href="#edit-'.$ordenCompra->id.'" class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-edit"></i>Editar</a>'.
-                               ' <a href="#remove-'.$ordenCompra->id.'" class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-remove"></i>Eliminar</a>';
+        $lineas = OrdenCompraLinea::with('articulo')->select('orden_compra_linea.*')->where('orden_compra_id', '=', $ordenCompraId);
+
+        return Datatables::of($lineas)
+                    ->addColumn('action', function ($linea) {
+                        return
+                            '<a class="btn btn-xs btn-primary" title="Editar" href="#modalForm" data-toggle="modal" data-href="'.url('orden-compra-linea/update/'.$linea->id).'">'.
+                            '<i class="glyphicon glyphicon-edit">'.
+                            'Editar</a>';
                     })
                     ->make(true);
-        //return Datatables::of(OrdenCompraLinea::where('orden_compra_id', '=', $ordenCompraId))->make(true);
     }
+
+    public function ordenCompraLineaUpdate(Request $request, $id)
+    {
+        if ($request->isMethod('get'))
+            return view('voyager::orden-compra.orden-compra-linea-form', ['ordenCompraLinea' => OrdenCompraLinea::find($id)]);
+        else {
+            $rules = [
+                'cantidad' => 'required',
+                //'email' => 'required|email',
+            ];
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails())
+                return response()->json([
+                    'fail' => true,
+                    'errors' => $validator->errors()
+                ]);
+            $ordenCompraLinea = OrdenCompraLinea::find($id);
+            $ordenCompraLinea->precio = $request->precio;
+            $ordenCompraLinea->cantidad = $request->cantidad;
+            $ordenCompraLinea->save();
+            return response()->json([
+                'fail' => false,
+                'redirect_url' => url('orden-compra/'.$ordenCompraLinea->ordenCompraId.'/edit')
+            ]);
+        }
+    }    
 }

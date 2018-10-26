@@ -18,7 +18,9 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::resource('orden-compra', 'OrdenCompraController');
-Route::get('orden-compra-linea', 'OrdenCompraController@ordenCompraLinea');
+
+Route::get('orden-compra-lineas', 'OrdenCompraController@ordenCompraLinea');
+Route::match(['get', 'put'], 'orden-compra-linea/update/{id}', 'OrdenCompraController@ordenCompraLineaUpdate');
 
 $namespacePrefix = '\\'.config('voyager.controllers.namespace').'\\';
 try {

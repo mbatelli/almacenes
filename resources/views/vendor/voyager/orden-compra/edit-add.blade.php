@@ -2,6 +2,30 @@
 
 @section('css')
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        .loading {
+            background: lightgrey;
+            padding: 15px;
+            position: fixed;
+            border-radius: 4px;
+            left: 50%;
+            top: 50%;
+            text-align: center;
+            margin: -40px 0 0 -50px;
+            z-index: 2000;
+            display: none;
+        }
+
+        a, a:hover {
+            color: white;
+        }
+
+        .form-group.required label:after {
+            content: " *";
+            color: red;
+            font-weight: bold;
+        }
+    </style>
 @stop
 
 @section('page_title', __('voyager::generic.'.(!is_null($dataTypeContent->getKey()) ? 'edit' : 'add')).' '.$dataType->display_name_singular)
@@ -89,27 +113,67 @@
 
                         </div><!-- panel-body -->
 
-    <table class="table table-bordered" id="orden-compra-lineas-table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-    </table>
-       <script>
-$(function() {
-    $('#orden-compra-lineas-table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: '{!! url('orden-compra-linea') !!}',
-        columns: [
-            { data: 'id', name: 'id' },
-            {data: 'action', name: 'action', orderable: false, searchable: false}
-        ]
-    });
-});
-         </script>                        
+                        <div class="modal fade" id="modalForm" tabindex="-1" role="dialog" data-backdrop="static">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content" id="modal_content"></div>
+                            </div>
+                        </div>
+                        <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" data-backdrop="static">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Delete Confirmation</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Are you sure want to delete?</p>
+                                        <input type="hidden" id="delete_token"/>
+                                        <input type="hidden" id="delete_id"/>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-danger"
+                                                onclick="ajaxDelete('{{url('laravel-crud-search-sort-ajax-modal-form/delete')}}/'+$('#delete_id').val(),$('#delete_token').val())">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <table class="table table-bordered" id="orden-compra-lineas-table">
+                            <thead>
+                                <tr>
+                                    <th>Articulo</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                        </table>
+
+                        <div class="loading">
+                            <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i><br/>
+                            <span>Loading</span>
+                        </div>
+
+                        <script>
+                            $(function() {
+                                $('#orden-compra-lineas-table').DataTable({
+                                    processing: true,
+                                    serverSide: true,
+                                    ajax: '{!! url('orden-compra-lineas?orden_compra_id=') !!}{{ $dataTypeContent->getKey() }}',
+                                    columns: [
+                                        { data: 'articulo.nombre', name: 'articulo.nombre' },
+                                        { data: 'cantidad', name: 'cantidad' },
+                                        { data: 'precio_formateado', name: 'precioFormateado' },
+                                        { data: 'action', name: 'action', orderable: false, searchable: false }
+                                    ]
+                                });
+                            });
+                        </script>
 
                         <div class="panel-footer">
                             <button type="submit" class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>
@@ -120,7 +184,7 @@ $(function() {
                     <form id="my_form" action="{{ route('voyager.upload') }}" target="form_target" method="post"
                             enctype="multipart/form-data" style="width:0;height:0;overflow:hidden">
                         <input name="image" id="upload_file" type="file"
-                                 onchange="$('#my_form').submit();this.value='';">
+                                    onchange="$('#my_form').submit();this.value='';">
                         <input type="hidden" name="type_slug" id="type_slug" value="{{ $dataType->slug }}">
                         {{ csrf_field() }}
                     </form>
@@ -155,6 +219,8 @@ $(function() {
 @stop
 
 @section('javascript')
+    <script src="{{asset('js/ajax-crud-modal-form.js')}}"></script>
+
     <script>
         var params = {};
         var $image;
