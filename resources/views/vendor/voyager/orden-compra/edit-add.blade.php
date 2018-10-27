@@ -25,6 +25,20 @@
             color: red;
             font-weight: bold;
         }
+
+        .table-title {
+            display: inline-block;
+            font-size: 18px;
+            height: 100px;
+            line-height: 43px;
+            margin-top: 3px;
+            padding-top: 28px;
+            color: #555;
+            position: relative;
+            padding-left: 15px;
+            font-weight: 700;
+            margin-right: 20px;
+        }        
     </style>
 @stop
 
@@ -111,6 +125,65 @@
                                 @endif
                             @endforeach
 
+                        <h1 class="table-title">
+                            Líneas de Orden de Compra
+                        </h1>
+                        <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Articulo</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio</th>
+                                    <th>
+                                        <a href="#modalForm" data-toggle="modal" data-href="{{url('orden-compra-linea/create')}}" title="Nuevo" style="text-decoration: none;">
+                                            <i class="voyager-plus"></i>
+                                        </a>
+                                    </th>
+                                </tr>
+                            </thead>
+                        </table>
+
+                        <div class="loading">
+                            <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i><br/>
+                            <span>Loading</span>
+                        </div>
+
+                        <script>
+                            $(function() {
+                                $('#orden-compra-lineas-table').DataTable({
+                                    language: {
+                                        url: '/i18n/datatables/spanish.json'
+                                    },
+                                    paging: false,
+                                    scrollY: 150,
+                                    processing: true,
+                                    serverSide: true,
+                                    ajax: '{!! url('orden-compra-lineas?orden_compra_id=') !!}{{ $dataTypeContent->getKey() }}',
+                                    columns: [
+                                        { data: 'articulo.nombre', name: 'articulo.nombre' },
+                                        { data: 'cantidad', name: 'cantidad' },
+                                        { data: 'precio_formateado', name: 'precio' },
+                                        { data: 'action', name: 'action', orderable: false, searchable: false }
+                                    ],
+                                    columnDefs: [
+                                        {
+                                            targets: 0,
+                                            className: 'dt-head-center dt-body-left'
+                                        },
+                                        {
+                                            targets: [ 1, 2 ],
+                                            className: 'dt-head-center dt-body-right'
+                                        },
+                                        {
+                                            targets: 3,
+                                            className: 'dt-head-center dt-body-center'
+                                        }
+                                    ]                                    
+                                });
+                            });
+                        </script>
+
+
                         </div><!-- panel-body -->
 
                         <div class="modal fade" id="modalForm" tabindex="-1" role="dialog" data-backdrop="static">
@@ -142,38 +215,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <table class="table table-bordered" id="orden-compra-lineas-table">
-                            <thead>
-                                <tr>
-                                    <th>Articulo</th>
-                                    <th>Cantidad</th>
-                                    <th>Precio</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                        </table>
-
-                        <div class="loading">
-                            <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i><br/>
-                            <span>Loading</span>
-                        </div>
-
-                        <script>
-                            $(function() {
-                                $('#orden-compra-lineas-table').DataTable({
-                                    processing: true,
-                                    serverSide: true,
-                                    ajax: '{!! url('orden-compra-lineas?orden_compra_id=') !!}{{ $dataTypeContent->getKey() }}',
-                                    columns: [
-                                        { data: 'articulo.nombre', name: 'articulo.nombre' },
-                                        { data: 'cantidad', name: 'cantidad' },
-                                        { data: 'precio_formateado', name: 'precioFormateado' },
-                                        { data: 'action', name: 'action', orderable: false, searchable: false }
-                                    ]
-                                });
-                            });
-                        </script>
 
                         <div class="panel-footer">
                             <button type="submit" class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>

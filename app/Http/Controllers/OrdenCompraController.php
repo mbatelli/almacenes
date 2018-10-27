@@ -101,9 +101,16 @@ class OrdenCompraController extends VoyagerBaseController
         return Datatables::of($lineas)
                     ->addColumn('action', function ($linea) {
                         return
-                            '<a class="btn btn-xs btn-primary" title="Editar" href="#modalForm" data-toggle="modal" data-href="'.url('orden-compra-linea/update/'.$linea->id).'">'.
-                            '<i class="glyphicon glyphicon-edit">'.
-                            'Editar</a>';
+                            '<a class="btn btn-sm btn-primary" title="Editar" style="text-decoration: none;" href="#modalForm" data-toggle="modal" data-href="'.url('orden-compra-linea/update/'.$linea->id).'">'.
+                            '<i class="voyager-edit"></i>'.
+                            '</a>'.
+                            '<input type="hidden" name="_method" value="delete"/>'.
+                            '<a class="btn btn-danger btn-sm" title="Eliminar" style="text-decoration: none;" data-toggle="modal" href="#modalDelete"'.
+                            '  data-id="'.$linea->id.'"'.
+                            '  data-token="'.csrf_token().'">'.
+                            '<i class="voyager-trash"></i>'.
+                            '</a>'
+                            ;
                     })
                     ->make(true);
     }
