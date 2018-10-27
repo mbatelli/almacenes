@@ -10,6 +10,15 @@
     </button>
 </div>
 <div class="modal-body">
+<!-- 
+    <div class="form-group row required">
+        {!! Form::label("articulo","Articulo",["class"=>"col-form-label col-md-3"]) !!}
+        <div class="col-md-9">
+            {!! Form::select("articulo", App\Almacenes\Model\Articulo::pluck('nombre', 'id'), null, ["class"=>"form-control".($errors->has('articulo')?" is-invalid":"")]) !!}
+            <span id="error-name" class="invalid-feedback"></span>
+        </div>
+    </div>
+-->
     <div class="form-group row required">
         {!! Form::label("cantidad","Cantidad",["class"=>"col-form-label col-md-3"]) !!}
         <div class="col-md-9">

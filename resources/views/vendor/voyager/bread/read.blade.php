@@ -35,7 +35,7 @@
                     <!-- form start -->
                     @foreach($dataType->readRows as $row)
                         @php
-                            $rowDetails = $row->details;
+                            $rowDetails = json_decode($row->details);
                             if ($rowDetails === null) {
                                 $rowDetails = new stdClass();
                                 $rowDetails->options = new stdClass();
