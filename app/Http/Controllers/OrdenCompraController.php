@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use TCG\Voyager\Database\Schema\SchemaManager;
 use TCG\Voyager\Events\BreadDataAdded;
 use TCG\Voyager\Events\BreadDataDeleted;
@@ -167,7 +168,9 @@ class OrdenCompraController extends VoyagerBaseController
             $ordenCompraLinea->save();
             return response()->json([
                 'fail' => false,
-                'redirect_url' => url('orden-compra/'.$ordenCompraLinea->ordenCompraId.'/edit')
+                'reload' => true,
+                'table_refresh' => 'orden-compra-lineas-table'
+//                'redirect_url' => url('orden-compra/'.$ordenCompraLinea->ordenCompraId.'/edit')
             ]);
         }
     }
@@ -178,11 +181,18 @@ class OrdenCompraController extends VoyagerBaseController
         $ordenCompra = $ordenCompraLinea->ordenCompra;
         //$ordenCompraLinea->delete();
 
+        return response()->json([
+            'fail' => false,
+            'reload' => true,
+            'table_refresh' => 'orden-compra-lineas-table'
+        ]);
+    /*
         return redirect()
             ->route('orden-compra.edit', $ordenCompra->id)
             ->with([
                 'message'    => __('voyager::generic.successfully_deleted')." Línea de Orden de Compra",
                 'alert-type' => 'success',
             ]);
+    */
     }
 }

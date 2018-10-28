@@ -1,7 +1,7 @@
 @if(!is_null($dataTypeContent->getKey()))
-    {!! Form::model($dataTypeContent,['method'=>'put','id'=>'frm']) !!}
+    {!! Form::model($dataTypeContent,['method'=>'put','id'=>'frmTbl']) !!}
 @else
-    {!! Form::open(['id'=>'frm']) !!}
+    {!! Form::open(['id'=>'frmTbl']) !!}
 @endif
 <div class="modal-header">
     <h1 class="page-title">
