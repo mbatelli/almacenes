@@ -125,96 +125,66 @@
                                 @endif
                             @endforeach
 
-                        <h1 class="table-title">
-                            Líneas de Orden de Compra
-                        </h1>
-                        <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Articulo</th>
-                                    <th>Cantidad</th>
-                                    <th>Precio</th>
-                                    <th>
-                                        <a href="#modalForm" data-toggle="modal" data-href="{{url('orden-compra-linea/create')}}" title="Nuevo" style="text-decoration: none;">
-                                            <i class="voyager-plus"></i>
-                                        </a>
-                                    </th>
-                                </tr>
-                            </thead>
-                        </table>
+                            <h1 class="table-title">
+                                Líneas de Orden de Compra
+                            </h1>
+                            <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Articulo</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio</th>
+                                        <th>
+                                            <a href="#modalForm" data-toggle="modal" data-href="{{url('orden-compra-linea/create')}}" title="Nuevo" style="text-decoration: none;">
+                                                <i class="voyager-plus"></i>
+                                            </a>
+                                        </th>
+                                    </tr>
+                                </thead>
+                            </table>
 
-                        <div class="loading">
-                            <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i><br/>
-                            <span>Loading</span>
-                        </div>
+                            <div class="loading">
+                                <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i><br/>
+                                <span>Loading</span>
+                            </div>
 
-                        <script>
-                            $(function() {
-                                $('#orden-compra-lineas-table').DataTable({
-                                    language: {
-                                        url: '/i18n/datatables/spanish.json'
-                                    },
-                                    paging: false,
-                                    scrollY: 150,
-                                    processing: true,
-                                    serverSide: true,
-                                    ajax: '{!! url('orden-compra-lineas?orden_compra_id=') !!}{{ $dataTypeContent->getKey() }}',
-                                    columns: [
-                                        { data: 'articulo.nombre', name: 'articulo.nombre' },
-                                        { data: 'cantidad', name: 'cantidad' },
-                                        { data: 'precio_formateado', name: 'precio' },
-                                        { data: 'action', name: 'action', orderable: false, searchable: false }
-                                    ],
-                                    columnDefs: [
-                                        {
-                                            targets: 0,
-                                            className: 'dt-head-center dt-body-left'
+                            <script>
+                                $(function() {
+                                    $('#orden-compra-lineas-table').DataTable({
+                                        language: {
+                                            url: '/i18n/datatables/spanish.json'
                                         },
-                                        {
-                                            targets: [ 1, 2 ],
-                                            className: 'dt-head-center dt-body-right'
-                                        },
-                                        {
-                                            targets: 3,
-                                            className: 'dt-head-center dt-body-center'
-                                        }
-                                    ]                                    
+                                        paging: false,
+                                        scrollY: 150,
+                                        processing: true,
+                                        serverSide: true,
+                                        ajax: '{!! url('orden-compra-lineas?orden_compra_id=') !!}{{ $dataTypeContent->getKey() }}',
+                                        columns: [
+                                            { data: 'articulo.nombre', name: 'articulo.nombre' },
+                                            { data: 'cantidad', name: 'cantidad' },
+                                            { data: 'precio_formateado', name: 'precio' },
+                                            { data: 'action', name: 'action', orderable: false, searchable: false }
+                                        ],
+                                        columnDefs: [
+                                            {
+                                                targets: 0,
+                                                className: 'dt-head-center dt-body-left'
+                                            },
+                                            {
+                                                targets: [ 1, 2 ],
+                                                className: 'dt-head-center dt-body-right'
+                                            },
+                                            {
+                                                targets: 3,
+                                                className: 'dt-head-center dt-body-center'
+                                            }
+                                        ]                                    
+                                    });
                                 });
-                            });
-                        </script>
+                            </script>
 
 
                         </div><!-- panel-body -->
-
-                        <div class="modal fade" id="modalForm" tabindex="-1" role="dialog" data-backdrop="static">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content" id="modal_content"></div>
-                            </div>
-                        </div>
-                        <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" data-backdrop="static">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Delete Confirmation</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>Are you sure want to delete?</p>
-                                        <input type="hidden" id="delete_token"/>
-                                        <input type="hidden" id="delete_id"/>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-danger"
-                                                onclick="ajaxDelete('{{url('laravel-crud-search-sort-ajax-modal-form/delete')}}/'+$('#delete_id').val(),$('#delete_token').val())">
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="panel-footer">
                             <button type="submit" class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>
@@ -230,6 +200,32 @@
                         {{ csrf_field() }}
                     </form>
 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade modal-danger" id="modalDelete">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">&times;</button>
+                    <h4 class="modal-title"><i class="voyager-warning"></i> {{ __('voyager::generic.are_you_sure') }}</h4>
+                </div>
+
+                <div class="modal-body">
+                    <h4>{{ __('voyager::generic.are_you_sure_delete') }} '<span class="confirm_delete_name"></span>'</h4>
+                    <input type="hidden" id="delete_token"/>
+                    <input type="hidden" id="delete_id"/>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
+                    <button type="button" class="btn btn-danger" id="confirm_delete"
+                            onclick="ajaxDelete('{{url('orden-compra-linea/delete')}}/'+$('#delete_id').val(),$('#delete_token').val())">>
+                            {{ __('voyager::generic.delete_confirm') }}</button>
                 </div>
             </div>
         </div>

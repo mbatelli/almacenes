@@ -21,9 +21,13 @@ class OrdenCompraLinea extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
+    public function articuloId()
+    {
+        return $this->belongsTo('App\Almacenes\Model\Articulo');
+    }
     public function articulo()
     {
-        return $this->belongsTo('App\Almacenes\Model\Articulo', 'articulo_id', 'id');
+        return $this->belongsTo('App\Almacenes\Model\Articulo');
     }
 
     public function getPrecioFormateadoAttribute()

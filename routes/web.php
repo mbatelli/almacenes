@@ -21,6 +21,7 @@ Route::resource('orden-compra', 'OrdenCompraController');
 
 Route::get('orden-compra-lineas', 'OrdenCompraController@ordenCompraLinea');
 Route::match(['get', 'put'], 'orden-compra-linea/update/{id}', 'OrdenCompraController@ordenCompraLineaUpdate');
+Route::delete('orden-compra-linea/delete/{id}', 'OrdenCompraController@ordenCompraLineaDelete');
 
 $namespacePrefix = '\\'.config('voyager.controllers.namespace').'\\';
 try {

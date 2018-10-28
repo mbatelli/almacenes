@@ -115,10 +115,41 @@ class OrdenCompraController extends VoyagerBaseController
                     ->make(true);
     }
 
+    public function editOrdenCompraLinea(Request $request, $id)
+    {
+        $slug = 'orden-compra-linea';//$this->getSlug($request);
+
+        $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
+
+        $relationships = $this->getRelationships($dataType);
+
+        $dataTypeContent = (strlen($dataType->model_name) != 0)
+            ? app($dataType->model_name)->with($relationships)->findOrFail($id)
+            : DB::table($dataType->name)->where('id', $id)->first(); // If Model doest exist, get data from table name
+
+        foreach ($dataType->editRows as $key => $row) {
+            $details = json_decode($row->details);
+            $dataType->editRows[$key]['col_width'] = isset($details->width) ? $details->width : 100;
+        }
+
+        // If a column has a relationship associated with it, we do not want to show that field
+        $this->removeRelationshipField($dataType, 'edit');
+
+        // Check permission
+        $this->authorize('edit', $dataTypeContent);
+
+        // Check if BREAD is Translatable
+        $isModelTranslatable = is_bread_translatable($dataTypeContent);
+
+        $view = 'voyager::orden-compra.orden-compra-linea-form';
+
+        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+    }
+
     public function ordenCompraLineaUpdate(Request $request, $id)
     {
         if ($request->isMethod('get'))
-            return view('voyager::orden-compra.orden-compra-linea-form', ['ordenCompraLinea' => OrdenCompraLinea::find($id)]);
+            return $this->editOrdenCompraLinea($request, $id);
         else {
             $rules = [
                 'cantidad' => 'required',
@@ -139,5 +170,19 @@ class OrdenCompraController extends VoyagerBaseController
                 'redirect_url' => url('orden-compra/'.$ordenCompraLinea->ordenCompraId.'/edit')
             ]);
         }
-    }    
+    }
+
+    public function ordenCompraLineaDelete($id)
+    {
+        $ordenCompraLinea = OrdenCompraLinea::with('ordenCompra')->find($id);
+        $ordenCompra = $ordenCompraLinea->ordenCompra;
+        //$ordenCompraLinea->delete();
+
+        return redirect()
+            ->route('orden-compra.edit', $ordenCompra->id)
+            ->with([
+                'message'    => __('voyager::generic.successfully_deleted')." Línea de Orden de Compra",
+                'alert-type' => 'success',
+            ]);
+    }
 }
