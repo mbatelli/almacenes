@@ -53,10 +53,8 @@
 @stop
 
 @section('head')
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">  
     <link  href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>  
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 @stop
 
@@ -131,11 +129,12 @@
                             <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>Articulo</th>
-                                        <th>Cantidad</th>
-                                        <th>Precio</th>
-                                        <th>
-                                            <a href="#modalForm" data-toggle="modal" data-href="{{url('orden-compra-linea/create')}}" title="Nuevo" style="text-decoration: none;">
+                                        <th style='vertical-align: middle;'>Articulo</th>
+                                        <th style='vertical-align: middle;'>Cantidad</th>
+                                        <th style='vertical-align: middle;'>Precio</th>
+                                        <th style='vertical-align: middle; width: 150px;'>
+                                        <a href="#modalForm" data-toggle="modal" data-href="{{ url('orden-compra-linea/create') }}/{{ $dataTypeContent->getKey() }}" title="Nuevo" 
+                                               class="btn btn-sm btn-success" style="text-decoration:none;">
                                                 <i class="voyager-plus"></i>
                                             </a>
                                         </th>
@@ -155,7 +154,7 @@
                                             url: '/i18n/datatables/spanish.json'
                                         },
                                         paging: false,
-                                        scrollY: 150,
+                                        scrollY: 350,
                                         processing: true,
                                         serverSide: true,
                                         ajax: '{!! url('orden-compra-lineas?orden_compra_id=') !!}{{ $dataTypeContent->getKey() }}',
