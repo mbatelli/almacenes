@@ -168,7 +168,7 @@ class OrdenCompraController extends VoyagerBaseController
             $ordenCompraLinea->save();
             return response()->json([
                 'fail' => false,
-                'reload' => true,
+//                'reload' => true,
                 'table_refresh' => 'orden-compra-lineas-table'
 //                'redirect_url' => url('orden-compra/'.$ordenCompraLinea->ordenCompraId.'/edit')
             ]);

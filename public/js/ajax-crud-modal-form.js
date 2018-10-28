@@ -38,7 +38,7 @@ $(document).on('submit', '#modalForm form#frmTbl', function (event) {
                     $('#error-' + control).html(data.errors[control]);
                 }
             } else {
-//                $('#modalForm').modal('hide');
+                $('#modalForm').modal('hide');
                 doResponseCommand(data);
 /*
                 if(data.reload) {
