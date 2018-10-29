@@ -126,7 +126,7 @@
                             @endforeach
 
                             <h1 class="table-title">
-                                Líneas de Orden de Compra
+                                Detalle
                             </h1>
                             <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
                                 <thead>
