@@ -20,6 +20,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('orden-compra', 'OrdenCompraController');
 
 Route::get('orden-compra-lineas', 'OrdenCompraController@ordenCompraLinea');
+Route::match(['get', 'post'], 'orden-compra-linea/create/{idOrden}', 'OrdenCompraController@createOrdenCompraLinea');
 Route::match(['get', 'put'], 'orden-compra-linea/update/{id}', 'OrdenCompraController@ordenCompraLineaUpdate');
 Route::delete('orden-compra-linea/delete/{id}', 'OrdenCompraController@ordenCompraLineaDelete');
 

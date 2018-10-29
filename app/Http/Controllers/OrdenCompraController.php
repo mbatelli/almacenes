@@ -116,6 +116,62 @@ class OrdenCompraController extends VoyagerBaseController
                     ->make(true);
     }
 
+    public function createOrdenCompraLinea(Request $request, $idOrden)
+    {
+        if ($request->isMethod('get')) {
+            $slug = 'orden-compra-linea';//$this->getSlug($request);
+
+            $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
+
+            $relationships = $this->getRelationships($dataType);
+
+            // Check permission
+            $this->authorize('add', app($dataType->model_name));
+
+            $dataTypeContent = (strlen($dataType->model_name) != 0)
+                                ? new $dataType->model_name()
+                                : false;
+
+            foreach ($dataType->editRows as $key => $row) {
+                $details = json_decode($row->details);
+                $dataType->editRows[$key]['col_width'] = isset($details->width) ? $details->width : 100;
+            }
+
+            // If a column has a relationship associated with it, we do not want to show that field
+            $this->removeRelationshipField($dataType, 'add');
+
+            // Check if BREAD is Translatable
+            $isModelTranslatable = is_bread_translatable($dataTypeContent);
+
+            $view = 'voyager::orden-compra.orden-compra-linea-form';
+
+            return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+        } else { // POST
+            $rules = [
+                'cantidad' => 'required',
+                //'email' => 'required|email',
+            ];
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails())
+                return response()->json([
+                    'fail' => true,
+                    'errors' => $validator->errors()
+                ]);
+            $ordenCompraLinea = new OrdenCompraLinea();
+            $ordenCompraLinea->orden_compra_id = $idOrden;
+            $ordenCompraLinea->articulo_id = $request->articulo_id;
+            $ordenCompraLinea->precio = $request->precio;
+            $ordenCompraLinea->cantidad = $request->cantidad;
+            $ordenCompraLinea->save();
+            return response()->json([
+                'fail' => false,
+//                'reload' => true,
+                'table_refresh' => 'orden-compra-lineas-table'
+//                'redirect_url' => url('orden-compra/'.$ordenCompraLinea->ordenCompraId.'/edit')
+            ]);
+        }
+    }
+
     public function editOrdenCompraLinea(Request $request, $id)
     {
         $slug = 'orden-compra-linea';//$this->getSlug($request);
@@ -125,8 +181,8 @@ class OrdenCompraController extends VoyagerBaseController
         $relationships = $this->getRelationships($dataType);
 
         $dataTypeContent = (strlen($dataType->model_name) != 0)
-            ? app($dataType->model_name)->with($relationships)->findOrFail($id)
-            : DB::table($dataType->name)->where('id', $id)->first(); // If Model doest exist, get data from table name
+                ? app($dataType->model_name)->with($relationships)->findOrFail($id)
+                : DB::table($dataType->name)->where('id', $id)->first(); // If Model doest exist, get data from table name
 
         foreach ($dataType->editRows as $key => $row) {
             $details = json_decode($row->details);
@@ -163,6 +219,7 @@ class OrdenCompraController extends VoyagerBaseController
                     'errors' => $validator->errors()
                 ]);
             $ordenCompraLinea = OrdenCompraLinea::find($id);
+            $ordenCompraLinea->articulo_id = $request->articulo_id;
             $ordenCompraLinea->precio = $request->precio;
             $ordenCompraLinea->cantidad = $request->cantidad;
             $ordenCompraLinea->save();
@@ -183,7 +240,7 @@ class OrdenCompraController extends VoyagerBaseController
 
         return response()->json([
             'fail' => false,
-            'reload' => true,
+//            'reload' => true,
             'table_refresh' => 'orden-compra-lineas-table'
         ]);
     /*
