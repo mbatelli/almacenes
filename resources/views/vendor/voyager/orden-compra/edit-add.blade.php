@@ -132,13 +132,15 @@
                             <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
                                 <thead>
                                     <tr>
+                                        <th style='vertical-align: middle; width: 50px;'>#</th>
                                         <th style='vertical-align: middle;'>Articulo</th>
                                         <th style='vertical-align: middle;'>Cantidad</th>
                                         <th style='vertical-align: middle;'>Precio</th>
                                         <th style='vertical-align: middle; width: 150px;'>
-                                        <a href="#modalForm" data-toggle="modal" data-href="{{ url('orden-compra-linea/create') }}/{{ $dataTypeContent->getKey() }}" title="Nuevo" 
+                                            <a href="#modalForm" data-toggle="modal" title="Nuevo" 
+                                               data-href="{{ url('orden-compra-linea/create') }}/{{ $dataTypeContent->getKey() }}"
                                                class="btn btn-sm btn-success" style="text-decoration:none;">
-                                                <i class="voyager-plus"></i>
+                                                    <i class="voyager-plus"></i>
                                             </a>
                                         </th>
                                     </tr>
@@ -162,22 +164,27 @@
                                         serverSide: true,
                                         ajax: '{!! url('orden-compra-lineas?orden_compra_id=') !!}{{ $dataTypeContent->getKey() }}',
                                         columns: [
-                                            { data: 'articulo.nombre', name: 'articulo.nombre' },
-                                            { data: 'cantidad', name: 'cantidad' },
+                                            { data: 'rownum',            name: 'rownum', orderable: false, searchable: false },
+                                            { data: 'articulo.nombre',   name: 'articulo.nombre' },
+                                            { data: 'cantidad',          name: 'cantidad' },
                                             { data: 'precio_formateado', name: 'precio' },
-                                            { data: 'action', name: 'action', orderable: false, searchable: false }
+                                            { data: 'action',            name: 'action', orderable: false, searchable: false }
                                         ],
                                         columnDefs: [
                                             {
                                                 targets: 0,
-                                                className: 'dt-head-center dt-body-left'
-                                            },
-                                            {
-                                                targets: [ 1, 2 ],
                                                 className: 'dt-head-center dt-body-right'
                                             },
                                             {
-                                                targets: 3,
+                                                targets: 1,
+                                                className: 'dt-head-center dt-body-left'
+                                            },
+                                            {
+                                                targets: [ 2,3 ],
+                                                className: 'dt-head-center dt-body-right'
+                                            },
+                                            {
+                                                targets: 4,
                                                 className: 'dt-head-center dt-body-center'
                                             }
                                         ]                                    
@@ -224,7 +231,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <h4>{{ __('voyager::generic.are_you_sure_delete') }} '<span class="confirm_delete_name"></span>'</h4>
+                    <h4>{{ __('voyager::generic.are_you_sure_delete_r') }} <span id="delete_nombre" class="confirm_delete_name"></span></h4>
                     <input type="hidden" id="delete_token"/>
                     <input type="hidden" id="delete_id"/>
                 </div>

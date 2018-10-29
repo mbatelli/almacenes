@@ -9,6 +9,7 @@ return [
     'all_done'               => 'Todo listo',
     'are_you_sure'           => 'Estás seguro',
     'are_you_sure_delete'    => 'Estás seguro que quieres borrarlo',
+    'are_you_sure_delete_r'  => 'Estás seguro que quieres borrar la fila',
     'auto_increment'         => 'Autoincremento',
     'bread'                  => 'BREAD',
     'browse'                 => 'Navegar',

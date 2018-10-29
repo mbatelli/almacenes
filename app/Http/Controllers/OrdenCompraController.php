@@ -23,7 +23,10 @@ class OrdenCompraController extends VoyagerBaseController
 {
     public function getSlug(Request $request)
     {
-        return 'orden-compra';
+        $slug = parent::getSlug($request);
+        if($slug == null)
+            $slug = explode('/', $request->route()->uri)[0];
+        return $slug;
     }
 
     public function edit(Request $request, $id)
@@ -97,29 +100,37 @@ class OrdenCompraController extends VoyagerBaseController
     public function ordenCompraLinea(Request $request, DataTables $dataTables)
     {
         $ordenCompraId = $request->input('orden_compra_id');
-        $lineas = OrdenCompraLinea::with('articulo')->select('orden_compra_linea.*')->where('orden_compra_id', '=', $ordenCompraId);
-
+        DB::statement(DB::raw('set @rownum=0'));
+        $lineas = OrdenCompraLinea::with('articulo')->select([DB::raw('@rownum  := @rownum  + 1 AS rownum'),'orden_compra_linea.*'])
+                                                    ->where('orden_compra_id', '=', $ordenCompraId);
         return Datatables::of($lineas)
-                    ->addColumn('action', function ($linea) {
+                ->addColumn('action', function ($linea) {
+                        $nombre = htmlspecialchars($linea->articulo->nombre);
                         return
-                            '<a class="btn btn-sm btn-primary" title="Editar" style="text-decoration: none;" href="#modalForm" data-toggle="modal" data-href="'.url('orden-compra-linea/update/'.$linea->id).'">'.
-                            '<i class="voyager-edit"></i>'.
+                            '<a class="btn btn-sm btn-primary" title="Editar" style="text-decoration: none;" href="#modalForm"'.
+                            '  data-toggle="modal" data-href="'.url('orden-compra-linea/update/'.$linea->id).'">'.
+                                '<i class="voyager-edit"></i>'.
                             '</a>'.
                             '<input type="hidden" name="_method" value="delete"/>'.
-                            '<a class="btn btn-danger btn-sm" title="Eliminar" style="text-decoration: none;" data-toggle="modal" href="#modalDelete"'.
+                            '<a class="btn btn-danger btn-sm" title="Eliminar" style="text-decoration: none;"'.
+                            '  data-toggle="modal" href="#modalDelete"'.
                             '  data-id="'.$linea->id.'"'.
-                            '  data-token="'.csrf_token().'">'.
-                            '<i class="voyager-trash"></i>'.
+                            '  data-token="'.csrf_token().'"'.
+                            '  data-nrolinea="'.$linea->rownum.'"'.
+                            '  data-nombre="'.$nombre.'"'.
+                            '>'.
+                                '<i class="voyager-trash"></i>'.
                             '</a>'
                             ;
                     })
-                    ->make(true);
+                ->orderColumn('articulo.nombre', 'articulo.nombre $1')
+                ->make(true);
     }
 
     public function createOrdenCompraLinea(Request $request, $idOrden)
     {
         if ($request->isMethod('get')) {
-            $slug = 'orden-compra-linea';//$this->getSlug($request);
+            $slug = $this->getSlug($request);
 
             $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
 
@@ -172,7 +183,7 @@ class OrdenCompraController extends VoyagerBaseController
 
     public function editOrdenCompraLinea(Request $request, $id)
     {
-        $slug = 'orden-compra-linea';//$this->getSlug($request);
+        $slug = $this->getSlug($request);
 
         $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
 

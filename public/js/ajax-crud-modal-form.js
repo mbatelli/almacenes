@@ -88,4 +88,5 @@ $('#modalDelete').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget);
     $('#delete_id').val(button.data('id'));
     $('#delete_token').val(button.data('token'));
+    $('#delete_nombre').html(button.data('nrolinea') + '<br/>' + button.data('nombre'));
 });
