@@ -52,11 +52,7 @@
     @include('voyager::multilingual.language-selector')
 @stop
 
-<<<<<<< HEAD
 @section('css')
-=======
-@section('head')
->>>>>>> cd29921351cef83c51e1cbbed35d29de640bfc2e
     <link  href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
 @stop
 @section('head')
