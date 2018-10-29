@@ -3,6 +3,7 @@
 @else
     {!! Form::open(['id'=>'frmTbl']) !!}
 @endif
+
 <div class="modal-header">
     <h1 class="page-title">
         <i class="{{ $dataType->icon }}"></i>

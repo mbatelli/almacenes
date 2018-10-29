@@ -165,9 +165,7 @@ class OrdenCompraController extends VoyagerBaseController
             $ordenCompraLinea->save();
             return response()->json([
                 'fail' => false,
-//                'reload' => true,
                 'table_refresh' => 'orden-compra-lineas-table'
-//                'redirect_url' => url('orden-compra/'.$ordenCompraLinea->ordenCompraId.'/edit')
             ]);
         }
     }
@@ -225,9 +223,7 @@ class OrdenCompraController extends VoyagerBaseController
             $ordenCompraLinea->save();
             return response()->json([
                 'fail' => false,
-//                'reload' => true,
                 'table_refresh' => 'orden-compra-lineas-table'
-//                'redirect_url' => url('orden-compra/'.$ordenCompraLinea->ordenCompraId.'/edit')
             ]);
         }
     }
@@ -236,20 +232,10 @@ class OrdenCompraController extends VoyagerBaseController
     {
         $ordenCompraLinea = OrdenCompraLinea::with('ordenCompra')->find($id);
         $ordenCompra = $ordenCompraLinea->ordenCompra;
-        //$ordenCompraLinea->delete();
-
+        $ordenCompraLinea->delete();
         return response()->json([
             'fail' => false,
-//            'reload' => true,
             'table_refresh' => 'orden-compra-lineas-table'
         ]);
-    /*
-        return redirect()
-            ->route('orden-compra.edit', $ordenCompra->id)
-            ->with([
-                'message'    => __('voyager::generic.successfully_deleted')." Línea de Orden de Compra",
-                'alert-type' => 'success',
-            ]);
-    */
     }
 }

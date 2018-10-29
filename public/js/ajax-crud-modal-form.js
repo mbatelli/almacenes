@@ -14,7 +14,7 @@ $(document).on('click', 'a.page-link', function (event) {
 $(document).on('submit', '#modalForm form#frmTbl', function (event) {
     event.preventDefault();
     var form = $(this);
-    var data = new FormData(form[0]);//$(this)[0]);
+    var data = new FormData(form[0]);
     var url = form.attr("action");
     $.ajax({
         type: form.attr('method'),
