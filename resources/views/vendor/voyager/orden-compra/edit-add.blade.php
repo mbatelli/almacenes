@@ -52,8 +52,10 @@
     @include('voyager::multilingual.language-selector')
 @stop
 
-@section('head')
+@section('css')
     <link  href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
+@stop
+@section('head')
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>  
     <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     
@@ -125,7 +127,7 @@
                             @endforeach
 
                             <h1 class="table-title">
-                                Líneas de Orden de Compra
+                                Detalle
                             </h1>
                             <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
                                 <thead>
