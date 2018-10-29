@@ -52,7 +52,11 @@
     @include('voyager::multilingual.language-selector')
 @stop
 
+<<<<<<< HEAD
 @section('css')
+=======
+@section('head')
+>>>>>>> cd29921351cef83c51e1cbbed35d29de640bfc2e
     <link  href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
 @stop
 @section('head')
@@ -131,11 +135,12 @@
                             <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>Articulo</th>
-                                        <th>Cantidad</th>
-                                        <th>Precio</th>
-                                        <th>
-                                            <a href="#modalForm" data-toggle="modal" data-href="{{url('orden-compra-linea/create')}}" title="Nuevo" style="text-decoration: none;">
+                                        <th style='vertical-align: middle;'>Articulo</th>
+                                        <th style='vertical-align: middle;'>Cantidad</th>
+                                        <th style='vertical-align: middle;'>Precio</th>
+                                        <th style='vertical-align: middle; width: 150px;'>
+                                        <a href="#modalForm" data-toggle="modal" data-href="{{ url('orden-compra-linea/create') }}/{{ $dataTypeContent->getKey() }}" title="Nuevo" 
+                                               class="btn btn-sm btn-success" style="text-decoration:none;">
                                                 <i class="voyager-plus"></i>
                                             </a>
                                         </th>
@@ -155,7 +160,7 @@
                                             url: '/i18n/datatables/spanish.json'
                                         },
                                         paging: false,
-                                        scrollY: 150,
+                                        scrollY: 350,
                                         processing: true,
                                         serverSide: true,
                                         ajax: '{!! url('orden-compra-lineas?orden_compra_id=') !!}{{ $dataTypeContent->getKey() }}',
