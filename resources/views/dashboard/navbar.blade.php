@@ -6,7 +6,7 @@
             </button>
             @section('breadcrumbs')
             <ol class="breadcrumb hidden-xs">
-                @if(count(Request::segments()) == 1)
+                @if(count(Request::segments()) == 0)
                     <li class="active"><i class="voyager-boat"></i> {{ __('voyager::generic.dashboard') }}</li>
                 @else
                     <li class="active">

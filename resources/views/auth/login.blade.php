@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="robots" content="none" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-    <meta name="description" content="admin login">
-    <title>Admin - {{ Voyager::setting("admin.title") }}</title>
+    <meta name="description" content="almacenes">
+    <title>{{ Voyager::setting('site.title', 'Voyager') }}</title>
     <link rel="stylesheet" href="{{ voyager_asset('css/app.css') }}">
     @if (config('voyager.multilingual.rtl'))
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-rtl/3.4.0/css/bootstrap-rtl.css">
