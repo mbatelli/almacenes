@@ -28,6 +28,7 @@ return [
     'database'               => 'Base de datos',
     'default'                => 'Defecto',
     'delete'                 => 'Borrar',
+    'restore'                => 'Restaurar',
     'delete_confirm'         => 'Sí, ¡Bórralo!',
     'delete_question'        => 'Estás seguro que quieres eliminar esta/este',
     'delete_this_confirm'    => 'Sí, eliminar esto',
