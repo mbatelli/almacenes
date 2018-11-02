@@ -16,4 +16,9 @@ class Ciudad extends Model
     {
         return $this->belongsTo('App\Almacenes\Model\Provincia');
     }
+
+    protected function listDropDown()
+    {
+        return Ciudad::orderBy('nombre', 'asc')->get();
+    }
 }

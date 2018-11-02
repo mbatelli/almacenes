@@ -16,4 +16,9 @@ class Deposito extends Model
     {
         return $this->belongsTo('App\Almacenes\Model\Ciudad');
     }
+
+    protected function listDropDown()
+    {
+        return Deposito::orderBy('nombre', 'asc')->get();
+    }
 }

@@ -16,4 +16,9 @@ class Proveedor extends Model
     {
         return $this->belongsTo('App\Almacenes\Model\Ciudad');
     }
+
+    protected function listDropDown()
+    {
+        return Proveedor::orderBy('nombre', 'asc')->get();
+    }
 }

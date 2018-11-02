@@ -16,4 +16,9 @@ class Presentacion extends Model
     {
         return $this->belongsTo('App\Almacenes\Model\Articulo');
     }
+
+    protected function listDropDown()
+    {
+        return Presentacion::orderBy('nombre', 'asc')->get();
+    }
 }

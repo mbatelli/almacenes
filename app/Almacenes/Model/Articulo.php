@@ -16,4 +16,9 @@ class Articulo extends Model
     {
         return $this->belongsTo('App\Almacenes\Model\Categoria');
     }
+
+    protected function listDropDown()
+    {
+        return Articulo::orderBy('nombre', 'asc')->get();
+    }
 }

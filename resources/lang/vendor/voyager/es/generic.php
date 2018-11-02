@@ -29,7 +29,7 @@ return [
     'default'                => 'Defecto',
     'delete'                 => 'Borrar',
     'delete_confirm'         => 'Sí, ¡Bórralo!',
-    'delete_question'        => 'Estás seguro que quieres eliminar esto',
+    'delete_question'        => 'Estás seguro que quieres eliminar esta/este',
     'delete_this_confirm'    => 'Sí, eliminar esto',
     'deselect_all'           => 'Deseleccionar todo',
     'download'               => 'Descargar',
