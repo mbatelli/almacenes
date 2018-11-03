@@ -3,7 +3,7 @@
 @if ($action->shouldActionDisplayOnDataType())
     @can($action->getPolicy(), $data)
         <a href="{{ str_replace('/admin', '', $action->getRoute($dataType->name)) }}" title="{{ $action->getTitle() }}" {!! $action->convertAttributesToHtml() !!}>
-            <i class="{{ $action->getIcon() }}"></i> <span class="hidden-xs hidden-sm">{{ $action->getTitle() }}</span>
+            <i class="{{ $action->getIcon() }}"></i> <span class="hidden-xs hidden-sm"></span>
         </a>
     @endcan
 @endif

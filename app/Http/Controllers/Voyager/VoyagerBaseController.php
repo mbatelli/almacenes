@@ -11,6 +11,7 @@ use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController as BaseVoyagerBaseController;
 use TCG\Voyager\Facades\Voyager as VoyagerFacade;
 use App\Almacenes\Actions\RestoreAction;
+use App\Almacenes\Actions\DeleteAction;
 
 class VoyagerBaseController extends BaseVoyagerBaseController
 {
@@ -111,7 +112,7 @@ class VoyagerBaseController extends BaseVoyagerBaseController
             $view = "voyager::$slug.browse";
         }
 
-        VoyagerFacade::addAction(RestoreAction::class);
+        VoyagerFacade::replaceAction(TCG\Voyager\Actions\DeleteAction::class, DeleteAction::class);
 
         return Voyager::view($view, compact(
             'dataType',
