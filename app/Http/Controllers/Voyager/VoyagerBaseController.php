@@ -7,6 +7,7 @@ use TCG\Voyager\Events\BreadDataAdded;
 use TCG\Voyager\Events\BreadDataDeleted;
 use TCG\Voyager\Events\BreadDataUpdated;
 use TCG\Voyager\Events\BreadImagesDeleted;
+use TCG\Voyager\Database\Schema\SchemaManager;
 use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController as BaseVoyagerBaseController;
 use TCG\Voyager\Facades\Voyager as VoyagerFacade;
@@ -67,7 +68,10 @@ class VoyagerBaseController extends BaseVoyagerBaseController
             $relationships = $this->getRelationships($dataType);
 
             $model = app($dataType->model_name);
-            $query = $model::withTrashed()->select('*')->with($relationships);
+            if(in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($model)))
+                $query = $model::withTrashed()->select('*')->with($relationships);
+            else
+                $query = $model::select('*')->with($relationships);
 
             // If a column has a relationship associated with it, we do not want to show that field
             $this->removeRelationshipField($dataType, 'browse');
