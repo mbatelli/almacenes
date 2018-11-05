@@ -7,6 +7,7 @@ use TCG\Voyager\Events\BreadDataAdded;
 use TCG\Voyager\Events\BreadDataDeleted;
 use TCG\Voyager\Events\BreadDataUpdated;
 use TCG\Voyager\Events\BreadImagesDeleted;
+use TCG\Voyager\Database\Schema\SchemaManager;
 use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController as BaseVoyagerBaseController;
 use TCG\Voyager\Facades\Voyager as VoyagerFacade;
@@ -67,7 +68,10 @@ class VoyagerBaseController extends BaseVoyagerBaseController
             $relationships = $this->getRelationships($dataType);
 
             $model = app($dataType->model_name);
-            $query = $model::withTrashed()->select('*')->with($relationships);
+            if(in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($model)))
+                $query = $model::withTrashed()->select('*')->with($relationships);
+            else
+                $query = $model::select('*')->with($relationships);
 
             // If a column has a relationship associated with it, we do not want to show that field
             $this->removeRelationshipField($dataType, 'browse');
@@ -217,6 +221,10 @@ class VoyagerBaseController extends BaseVoyagerBaseController
 
     public function destroy(Request $request, $id)
     {
+        $mixed_action = $request->input('action_mixed');
+        if($mixed_action == 'RESTORE')
+            return $this->restore($request, $id);
+
         $slug = $this->getSlug($request);
 
         $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
@@ -255,6 +263,44 @@ class VoyagerBaseController extends BaseVoyagerBaseController
             event(new BreadDataDeleted($dataType, $data));
         }
 
+        return redirect()->route("{$dataType->slug}.index")->with($data);
+    }
+
+    public function restore(Request $request, $id)
+    {
+        $slug = $this->getSlug($request);
+
+        $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
+
+        // Check permission
+        $this->authorize('delete', app($dataType->model_name));
+
+        // Init array of IDs
+        $ids = [];
+        if (empty($id)) {
+            // Bulk restore, get IDs from POST
+            $ids = explode(',', $request->ids);
+        } else {
+            // Single item restore, get ID from URL
+            $ids[] = $id;
+        }
+
+        $displayName = count($ids) > 1 ? $dataType->display_name_plural : $dataType->display_name_singular;
+
+
+        
+        $model = app($dataType->model_name);
+        $res = $model::withTrashed()->where('id', $ids)->restore();
+
+        $data = $res
+            ? [
+                'message'    => __('voyager::generic.successfully_restored')." {$displayName}",
+                'alert-type' => 'success',
+            ]
+            : [
+                'message'    => __('voyager::generic.error_restoring')." {$displayName}",
+                'alert-type' => 'error',
+            ];
         return redirect()->route("{$dataType->slug}.index")->with($data);
     }
 

@@ -234,6 +234,7 @@
                     <form action="#" id="delete_form" method="POST">
                         {{ method_field('DELETE') }}
                         {{ csrf_field() }}
+                        <input type="hidden" name="action_mixed" value="DELETE">
                         <input type="submit" class="btn btn-danger pull-right delete-confirm" value="{{ __('voyager::generic.delete_confirm') }}">
                     </form>
                     <button type="button" class="btn btn-default pull-right" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
@@ -252,8 +253,9 @@
                 </div>
                 <div class="modal-footer">
                     <form action="#" id="restore_form" method="POST">
-                        {{ method_field('RESTORE') }}
+                        {{ method_field('DELETE') }}
                         {{ csrf_field() }}
+                        <input type="hidden" name="action_mixed" value="RESTORE">
                         <input type="submit" class="btn btn-danger pull-right delete-confirm" value="{{ __('voyager::generic.restore_confirm') }}">
                     </form>
                     <button type="button" class="btn btn-default pull-right" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
@@ -310,7 +312,7 @@
             $('#delete_modal').modal('show');
         });
         $('td').on('click', '.restore', function (e) {
-            $('#restore_form')[0].action = '{{ route($dataType->slug.'.restore', ['id' => '__id']) }}'.replace('__id', $(this).data('id'));
+            $('#restore_form')[0].action = '{{ route($dataType->slug.'.destroy', ['id' => '__id']) }}'.replace('__id', $(this).data('id'));
             $('#restore_modal').modal('show');
         });
     </script>
