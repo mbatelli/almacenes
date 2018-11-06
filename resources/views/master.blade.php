@@ -43,6 +43,7 @@
         @foreach(config('voyager.additional_css') as $css)<link rel="stylesheet" type="text/css" href="{{ asset($css) }}">@endforeach
     @endif
     <link rel="stylesheet" type="text/css" href="{{ asset('css/almacenes.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/datatables.min.css') }}">
 
     @yield('head')
 </head>

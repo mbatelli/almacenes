@@ -276,6 +276,7 @@
     @if(!$dataType->server_side && config('dashboard.data_tables.responsive'))
         <script src="{{ voyager_asset('lib/js/dataTables.responsive.min.js') }}"></script>
     @endif
+    <script src="{{ asset('js/datatables.min.js') }}"></script>
     <script>
         $(document).ready(function () {
             @if (!$dataType->server_side)
@@ -284,6 +285,8 @@
                         "order" => [],
                         "language" => __('voyager::datatable'),
                         "columnDefs" => [['targets' => -1, 'searchable' =>  false, 'orderable' => false]],
+                        "dom" => 'Bfrtip',
+                        "buttons" => ['pdf'],
                     ],
                     config('voyager.dashboard.data_tables', []))
                 , true) !!});
