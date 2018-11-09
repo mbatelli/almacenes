@@ -33,7 +33,7 @@ try {
 
         Route::get($dataType->slug.'/order', $breadController.'@order')->name($dataType->slug.'.order');
         Route::post($dataType->slug.'/order', $breadController.'@update_order')->name($dataType->slug.'.order');
-        //Route::post($dataType->slug.'/{'.$dataType->slug.'}'.'/restore', $breadController.'@restore')->name($dataType->slug.'.restore');
+        Route::get($dataType->slug.'/{'.$dataType->slug.'}/print', $breadController.'@print')->name($dataType->slug.'.print');
         Route::resource($dataType->slug, $breadController);
     }
 } catch (\InvalidArgumentException $e) {

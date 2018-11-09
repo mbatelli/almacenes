@@ -10,13 +10,14 @@ use TCG\Voyager\Events\BreadDataAdded;
 use TCG\Voyager\Events\BreadDataDeleted;
 use TCG\Voyager\Events\BreadDataUpdated;
 use TCG\Voyager\Events\BreadImagesDeleted;
-use TCG\Voyager\Facades\Voyager;
+use TCG\Voyager\Facades\Voyager as VoyagerFacade;
 use TCG\Voyager\Http\Controllers\Traits\BreadRelationshipParser;
 use App\Http\Controllers\Voyager\VoyagerBaseController;
 use Yajra\DataTables\DataTables;
 use App\Almacenes\Model\RemitoLinea;
 use App\Almacenes\Model\Remito;
 use App\Almacenes\Model\Articulo;
+use App\Almacenes\Actions\PrintAction;
 
 class RemitoController extends VoyagerBaseController
 {
@@ -28,6 +29,10 @@ class RemitoController extends VoyagerBaseController
         return $slug;
     }
 
+    public function specifyActions() {
+        parent::specifyActions();
+        VoyagerFacade::addAction(PrintAction::class);
+    }
 /*
     public function ordenCompraLinea(Request $request, DataTables $dataTables)
     {

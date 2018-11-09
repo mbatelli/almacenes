@@ -67,6 +67,7 @@ return [
     'password'               => 'Contraseña',
     'permissions'            => 'Permisos',
     'profile'                => 'Perfil',
+    'print'                  => 'Imprimir',
     'public_url'             => 'URL pública',
     'read'                   => 'Leer',
     'rename'                 => 'Renombrar',

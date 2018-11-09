@@ -11,7 +11,6 @@ use TCG\Voyager\Database\Schema\SchemaManager;
 use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController as BaseVoyagerBaseController;
 use TCG\Voyager\Facades\Voyager as VoyagerFacade;
-use App\Almacenes\Actions\RestoreAction;
 use App\Almacenes\Actions\DeleteAction;
 
 class VoyagerBaseController extends BaseVoyagerBaseController
@@ -33,6 +32,18 @@ class VoyagerBaseController extends BaseVoyagerBaseController
         return $slug;
     }
 
+    public function specifyActions() {
+        VoyagerFacade::replaceAction(TCG\Voyager\Actions\DeleteAction::class, DeleteAction::class);
+    }
+
+    public function print(Request $request, $id)
+    {
+        $headers = [
+            'Content-Type' => 'application/pdf',
+         ];
+        $file_path = public_path('files/remito.pdf');
+        return response()->download($file_path, 'remito.pdf', $headers);
+    }
     //***************************************
     //               ____
     //              |  _ \
@@ -116,7 +127,7 @@ class VoyagerBaseController extends BaseVoyagerBaseController
             $view = "voyager::$slug.browse";
         }
 
-        VoyagerFacade::replaceAction(TCG\Voyager\Actions\DeleteAction::class, DeleteAction::class);
+        $this->specifyActions();
 
         return Voyager::view($view, compact(
             'dataType',

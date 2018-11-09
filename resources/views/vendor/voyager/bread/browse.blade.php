@@ -286,7 +286,7 @@
                         "language" => __('voyager::datatable'),
                         "columnDefs" => [['targets' => -1, 'searchable' =>  false, 'orderable' => false]],
                         "dom" => 'Bfrtip',
-                        "buttons" => ['pdf'],
+                        "buttons" => ['pdf', 'excel'],
                     ],
                     config('voyager.dashboard.data_tables', []))
                 , true) !!});

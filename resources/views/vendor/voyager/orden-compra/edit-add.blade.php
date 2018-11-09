@@ -38,7 +38,7 @@
             padding-left: 15px;
             font-weight: 700;
             margin-right: 20px;
-        }        
+        }       
     </style>
 @stop
 
@@ -61,73 +61,82 @@
 @stop
 
 @section('content')
-    <div class="page-content edit-add container-fluid">
+    <div class="page-content container-fluid">
         <div class="row">
             <div class="col-md-12">
+                <!-- form start -->
+                <form role="form"
+                        class="form-edit-add"
+                        action="@if(!is_null($dataTypeContent->getKey())){{ route($dataType->slug.'.update', $dataTypeContent->getKey()) }}@else{{ route('voyager.'.$dataType->slug.'.store') }}@endif"
+                        method="POST" enctype="multipart/form-data">
+                    <!-- PUT Method if we are editing -->
+                    @if(!is_null($dataTypeContent->getKey()))
+                        {{ method_field("PUT") }}
+                    @endif
 
-                <div class="panel panel-bordered">
-                    <!-- form start -->
-                    <form role="form"
-                            class="form-edit-add"
-                            action="@if(!is_null($dataTypeContent->getKey())){{ route($dataType->slug.'.update', $dataTypeContent->getKey()) }}@else{{ route('voyager.'.$dataType->slug.'.store') }}@endif"
-                            method="POST" enctype="multipart/form-data">
-                        <!-- PUT Method if we are editing -->
-                        @if(!is_null($dataTypeContent->getKey()))
-                            {{ method_field("PUT") }}
-                        @endif
+                    <!-- CSRF TOKEN -->
+                    {{ csrf_field() }}
 
-                        <!-- CSRF TOKEN -->
-                        {{ csrf_field() }}
+                    @if (count($errors) > 0)
+                        <div class="panel panel-primary panel-bordered">
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endif
 
+                    <!-- Adding / Editing -->
+                    @php
+                        $dataTypeRows = $dataType->{(!is_null($dataTypeContent->getKey()) ? 'editRows' : 'addRows' )};
+                    @endphp
+
+                    <div class="panel panel-primary panel-bordered">
+                        <div class="panel-heading">
+                            <h3 class="panel-title panel-icon">Datos</h3>
+                            <div class="panel-actions">
+                                <a class="panel-action voyager-angle-up" data-toggle="panel-collapse" aria-hidden="true"></a>
+                            </div>
+                        </div>
                         <div class="panel-body">
-
-                            @if (count($errors) > 0)
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
+                            <div class="row clearfix">
+                                <div class="col-md-6 form-group">
+                                    @php
+                                        $field = 'nro_orden_compra';
+                                    @endphp
+                                    @include('formfields')
                                 </div>
-                            @endif
+                                <div class="col-md-6 form-group">
+                                    @php
+                                        $field = 'fecha';
+                                    @endphp
+                                    @include('formfields')
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    @php
+                                        $field = 'proveedor_id';
+                                    @endphp
+                                    @include('formfields')
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                            <!-- Adding / Editing -->
-                            @php
-                                $dataTypeRows = $dataType->{(!is_null($dataTypeContent->getKey()) ? 'editRows' : 'addRows' )};
-                            @endphp
+                    <div class="panel-footer">
+                        <button type="submit" class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>
+                    </div>
 
-                            @foreach($dataTypeRows as $row)
-                                <!-- GET THE DISPLAY OPTIONS -->
-                                @php
-                                    $options = json_decode($row->details);
-                                    $display_options = isset($options->display) ? $options->display : NULL;
-                                @endphp
-                                @if ($options && isset($options->legend) && isset($options->legend->text))
-                                    <legend class="text-{{isset($options->legend->align) ? $options->legend->align : 'center'}}" style="background-color: {{isset($options->legend->bgcolor) ? $options->legend->bgcolor : '#f0f0f0'}};padding: 5px;">{{$options->legend->text}}</legend>
-                                @endif
-                                @if ($options && isset($options->formfields_custom))
-                                    @include('voyager::formfields.custom.' . $options->formfields_custom)
-                                @else
-                                    <div class="form-group @if($row->type == 'hidden') hidden @endif col-md-{{ isset($display_options->width) ? $display_options->width : 12 }}" @if(isset($display_options->id)){{ "id=$display_options->id" }}@endif>
-                                        {{ $row->slugify }}
-                                        <label for="name">{{ $row->display_name }}</label>
-                                        @include('voyager::multilingual.input-hidden-bread-edit-add')
-                                        @if($row->type == 'relationship')
-                                            @include('voyager::formfields.relationship')
-                                        @else
-                                            {!! app('voyager')->formField($row, $dataType, $dataTypeContent) !!}
-                                        @endif
-
-                                        @foreach (app('voyager')->afterFormFields($row, $dataType, $dataTypeContent) as $after)
-                                            {!! $after->handle($row, $dataType, $dataTypeContent) !!}
-                                        @endforeach
-                                    </div>
-                                @endif
-                            @endforeach
-
-                            <h1 class="table-title">
-                                Detalle
-                            </h1>
+                    <div class="panel panel-primary panel-bordered" style="margin-top: 20px;">
+                        <div class="panel-heading">
+                            <h3 class="panel-title panel-icon">Detalle</h3>
+                            <div class="panel-actions">
+                                <a class="panel-action voyager-angle-up" data-toggle="panel-collapse" aria-hidden="true"></a>
+                            </div>
+                        </div>
+                        <div class="panel-body">
                             <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
                                 <thead>
                                     <tr>
@@ -158,7 +167,6 @@
                                             url: '/i18n/datatables/spanish.json'
                                         },
                                         paging: false,
-                                        scrollY: 350,
                                         processing: true,
                                         serverSide: true,
                                         ajax: '{!! url('orden-compra-lineas?orden_compra_id=') !!}{{ $dataTypeContent->getKey() }}',
@@ -191,24 +199,9 @@
                                 });
                             </script>
 
-
-                        </div><!-- panel-body -->
-
-                        <div class="panel-footer">
-                            <button type="submit" class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>
                         </div>
-                    </form>
-
-                    <iframe id="form_target" name="form_target" style="display:none"></iframe>
-                    <form id="my_form" action="{{ route('voyager.upload') }}" target="form_target" method="post"
-                            enctype="multipart/form-data" style="width:0;height:0;overflow:hidden">
-                        <input name="image" id="upload_file" type="file"
-                                    onchange="$('#my_form').submit();this.value='';">
-                        <input type="hidden" name="type_slug" id="type_slug" value="{{ $dataType->slug }}">
-                        {{ csrf_field() }}
-                    </form>
-
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
