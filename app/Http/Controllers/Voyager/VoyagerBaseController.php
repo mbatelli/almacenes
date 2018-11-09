@@ -13,6 +13,7 @@ use TCG\Voyager\Http\Controllers\VoyagerBaseController as BaseVoyagerBaseControl
 use TCG\Voyager\Facades\Voyager as VoyagerFacade;
 use App\Almacenes\Actions\DeleteAction;
 
+
 class VoyagerBaseController extends BaseVoyagerBaseController
 {
     public function getSlug(Request $request)
@@ -36,13 +37,8 @@ class VoyagerBaseController extends BaseVoyagerBaseController
         VoyagerFacade::replaceAction(TCG\Voyager\Actions\DeleteAction::class, DeleteAction::class);
     }
 
-    public function print(Request $request, $id)
-    {
-        $headers = [
-            'Content-Type' => 'application/pdf',
-         ];
-        $file_path = public_path('files/remito.pdf');
-        return response()->download($file_path, 'remito.pdf', $headers);
+    public function print(Request $request, $id) {
+
     }
     //***************************************
     //               ____
