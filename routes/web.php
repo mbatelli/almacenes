@@ -24,6 +24,10 @@ Route::match(['get', 'post'], 'orden-compra-linea/create/{idOrden}', 'OrdenCompr
 Route::match(['get', 'put'], 'orden-compra-linea/update/{id}', 'OrdenCompraController@ordenCompraLineaUpdate');
 Route::delete('orden-compra-linea/delete/{id}', 'OrdenCompraController@ordenCompraLineaDelete');
 
+Route::get('/consulta-existencia', 'ListadoController@consultaExistencia');
+Route::get('/puntos-stock-criticos', 'ListadoController@puntosStockCriticos');
+Route::get('/listado-valorizacion', 'ListadoController@listadoValorizacion');
+
 $namespacePrefix = '\\'.config('voyager.controllers.namespace').'\\';
 try {
     foreach (DataType::all() as $dataType) {
