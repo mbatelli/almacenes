@@ -109,7 +109,6 @@
                     array_merge([
                         "order" => [],
                         "language" => __('voyager::datatable'),
-                        "columnDefs" => [['targets' => -1, 'searchable' =>  false, 'orderable' => false]],
                         "dom" => 'Bfrtip',
                         "buttons" => ['pdf', 'excel'],
                     ],
