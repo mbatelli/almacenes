@@ -18,6 +18,7 @@ use App\Almacenes\Model\RemitoLinea;
 use App\Almacenes\Model\Remito;
 use App\Almacenes\Model\Articulo;
 use App\Almacenes\Actions\PrintAction;
+use PHPJasper\PHPJasper;
 
 class RemitoController extends VoyagerBaseController
 {
@@ -33,6 +34,34 @@ class RemitoController extends VoyagerBaseController
         parent::specifyActions();
         VoyagerFacade::addAction(PrintAction::class);
     }
+
+    public function print(Request $request, $id) {
+        $input = base_path() . '/resources/reports/remito.jasper';
+        $output = base_path() . '/resources/reports';
+        $options = [
+            'format' => ['pdf'],
+            'locale' => 'es',
+            'params' => [
+                'numero' => 123456
+            ]
+        ];
+
+        $file = $output . '/remito.pdf';
+        if (file_exists($file)) {
+            unlink($file);
+        }
+        $jasper = new PHPJasper;
+        $jasper->process(
+            $input,
+            $output,
+            $options
+        )->execute();
+
+        $name = sprintf("Remito %s.pdf", '123456');
+        $headers = ['Content-Type: application/pdf'];
+        return response()->download($file, $name, $headers);
+    }
+
 /*
     public function ordenCompraLinea(Request $request, DataTables $dataTables)
     {
