@@ -78,16 +78,46 @@ class ListadoController extends Controller
     }
 
     public function listadoValorizacion(Request $request) {
-        $columns = array(new ColumnDef('articulo', 'Articulo'), new ColumnDef('stock_critico', 'Stock Crítico'));
+        $fechaDeHoy = new \DateTime();
+        $columns = array(new ColumnDef('deposito', 'Deposito'), new ColumnDef('codigo', 'Cod'), 
+                        new ColumnDef('articulo', 'Articulo'), 
+                        new ColumnDef('stock', 'Stock al '.$fechaDeHoy->format('d/m/Y')),
+                        new ColumnDef('nrosOC', 'Nro. OC'), new ColumnDef('fechasOC', 'Fecha'),
+                        new ColumnDef('preciosOC', 'Precio'), new ColumnDef('costo', 'Costo'),
+                        new ColumnDef('total', 'Total'));
 
-        $collection = Articulo::all();
+        $collection = DB::table('articulo')
+                        ->join('remito_linea', 'articulo.id' , '=', 'remito_linea.articulo_id')
+                        ->join('remito', 'remito.id' , '=', 'remito_linea.remito_id')
+                        ->join('deposito', 'deposito.id' , '=', 'remito.deposito_id')
+                        ->leftJoin('orden_compra', 'orden_compra.id' , '=', 'remito.orden_compra_id')
+                        ->leftJoin('orden_compra_linea', 
+                            function($join){$join->on('orden_compra.id' , '=', 'orden_compra_linea.orden_compra_id');
+                                 $join->on('articulo.id' , '=', 'orden_compra_linea.articulo_id');})
+                        ->select('deposito.nombre as deposito', 'articulo.codigo as codigo', 'articulo.nombre as articulo', 
+                                DB::raw('sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad)) as stock'),
+                                DB::raw('FORMAT(sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,0)*IF(remito.tipo="REMITO_ENTRADA",orden_compra_linea.precio,0)) / sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad)),2,"es_AR") as costo'),
+                                DB::raw('FORMAT(sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,0)*IF(remito.tipo="REMITO_ENTRADA",orden_compra_linea.precio,0)),2,"es_AR") as total'),
+                                DB::raw('GROUP_CONCAT(orden_compra.nro_orden_compra SEPARATOR "|") as nrosOC'),
+                                DB::raw('GROUP_CONCAT(DATE_FORMAT(orden_compra.fecha, "%d/%m/%Y") SEPARATOR "|") as fechasOC'),
+                                DB::raw('GROUP_CONCAT(FORMAT(orden_compra_linea.precio,2,"es_AR") SEPARATOR "|") as preciosOC'))
+                        ->where('remito.tipo','<>','PROVISORIO_SALIDA')
+                        ->groupBy('deposito.id','articulo.id')
+                        ->get();
         $data = [];
         foreach ($collection as $item) {
             $rowData = new RowData();
 
             $rowData->values = array(
-                'articulo' => $item->nombre,
-                'stock_critico' => $item->stock_critico
+                'deposito' => $item->deposito,
+                'codigo' => $item->codigo,
+                'articulo' => $item->articulo,
+                'stock' => $item->stock,
+                'nrosOC' => $item->nrosOC,
+                'fechasOC' => $item->fechasOC,
+                'preciosOC' => $item->preciosOC,
+                'costo' => $item->costo,
+                'total' => $item->total
             );
 
             array_push($data, $rowData);
@@ -95,7 +125,6 @@ class ListadoController extends Controller
 
         $queryDef = new QueryDef('voyager-download', 'Listado de Valorizacion', $columns, $data);
         $isServerSide = false;
-        $view = "listado";
         return view('listado', compact('queryDef', 'isServerSide'));
     }
 }
