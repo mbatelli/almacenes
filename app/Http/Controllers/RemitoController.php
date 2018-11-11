@@ -48,6 +48,12 @@ class RemitoController extends VoyagerBaseController
         return $this->printJasperToPDF($jasperName, $params, $downloadName);
     }
 
+    /*
+    $params = [
+        'numero' => 123456,
+        'qr' => $this->generateQR($remito)
+    ];
+    */
     private function generateQR($remito) {
         // Create a basic QR code
         $qrCode = new QrCode('123456');
@@ -66,8 +72,10 @@ class RemitoController extends VoyagerBaseController
         $qrCode->setRoundBlockSize(true);
         $qrCode->setValidateResult(true);
         $qrCode->setWriterOptions(['exclude_xml_declaration' => true]);
+        $qrFilePath = $this->getReportPath() . '/remito-qrcode.png';
+        $qrCode->writeFile($qrFilePath);
 
-        return $qrCode->writeString();
+        return $qrFilePath;
     }
 
 /*
