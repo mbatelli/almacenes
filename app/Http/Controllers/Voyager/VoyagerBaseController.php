@@ -42,16 +42,20 @@ class VoyagerBaseController extends BaseVoyagerBaseController
 
     }
 
+    protected function getReportPath() {
+        return base_path() . '/resources/reports';
+    }
+
     public function printJasperToPDF($jasperName, $params, $downloadName) {
-        $input = base_path() . '/resources/reports/' . $jasperName . '.jasper';
-        $output = base_path() . '/resources/reports';
+        $input = $this->getReportPath(). '/' . $jasperName . '.jasper';
+        $output = $this->getReportPath();
         $options = [
             'format' => ['pdf'],
             'locale' => 'es',
             'params' => $params
         ];
 
-        $pdfFile = $output . '/' . $jasperName . '.pdf';
+        $pdfFile = $output. '/' . $jasperName . '.pdf';
         if (file_exists($pdfFile)) {
             unlink($pdfFile);
         }
