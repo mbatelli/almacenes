@@ -44,7 +44,7 @@ class RemitoController extends VoyagerBaseController
         $params = [
             'numero' => $remito->numero
         ];
-        $downloadName = sprintf("Remito %s.pdf", '123456');
+        $downloadName = sprintf("Remito %s.pdf", $remito->numero);
         return $this->printJasperToPDF($jasperName, $params, $downloadName);
     }
 
