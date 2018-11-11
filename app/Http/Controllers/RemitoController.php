@@ -18,7 +18,10 @@ use App\Almacenes\Model\RemitoLinea;
 use App\Almacenes\Model\Remito;
 use App\Almacenes\Model\Articulo;
 use App\Almacenes\Actions\PrintAction;
-use PHPJasper\PHPJasper;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\LabelAlignment;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Response\QrCodeResponse;
 
 class RemitoController extends VoyagerBaseController
 {
@@ -36,30 +39,35 @@ class RemitoController extends VoyagerBaseController
     }
 
     public function print(Request $request, $id) {
-        $input = base_path() . '/resources/reports/remito.jasper';
-        $output = base_path() . '/resources/reports';
-        $options = [
-            'format' => ['pdf'],
-            'locale' => 'es',
-            'params' => [
-                'numero' => 123456
-            ]
+        $remito = Remito::findOrFail($id);
+        $jasperName = 'remito';
+        $params = [
+            'numero' => 123456
         ];
+        $downloadName = sprintf("Remito %s.pdf", '123456');
+        return $this->printJasperToPDF($jasperName, $params, $downloadName);
+    }
 
-        $file = $output . '/remito.pdf';
-        if (file_exists($file)) {
-            unlink($file);
-        }
-        $jasper = new PHPJasper;
-        $jasper->process(
-            $input,
-            $output,
-            $options
-        )->execute();
+    private function generateQR($remito) {
+        // Create a basic QR code
+        $qrCode = new QrCode('123456');
+        $qrCode->setSize(300);
 
-        $name = sprintf("Remito %s.pdf", '123456');
-        $headers = ['Content-Type: application/pdf'];
-        return response()->download($file, $name, $headers);
+        // Set advanced options
+        $qrCode->setWriterByName('png');
+        $qrCode->setMargin(10);
+        $qrCode->setEncoding('UTF-8');
+        $qrCode->setErrorCorrectionLevel(ErrorCorrectionLevel::HIGH);
+        $qrCode->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0, 'a' => 0]);
+        $qrCode->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255, 'a' => 0]);
+        //$qrCode->setLabel('Scan the code', 16, __DIR__ . '/../assets/fonts/noto_sans.otf', LabelAlignment::CENTER);
+        //$qrCode->setLogoPath(__DIR__ . '/../assets/images/symfony.png');
+        //$qrCode->setLogoSize(150, 200);
+        $qrCode->setRoundBlockSize(true);
+        $qrCode->setValidateResult(true);
+        $qrCode->setWriterOptions(['exclude_xml_declaration' => true]);
+
+        return $qrCode->writeString();
     }
 
 /*

@@ -12,6 +12,7 @@ use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController as BaseVoyagerBaseController;
 use TCG\Voyager\Facades\Voyager as VoyagerFacade;
 use App\Almacenes\Actions\DeleteAction;
+use PHPJasper\PHPJasper;
 
 
 class VoyagerBaseController extends BaseVoyagerBaseController
@@ -40,6 +41,31 @@ class VoyagerBaseController extends BaseVoyagerBaseController
     public function print(Request $request, $id) {
 
     }
+
+    public function printJasperToPDF($jasperName, $params, $downloadName) {
+        $input = base_path() . '/resources/reports/' . $jasperName . '.jasper';
+        $output = base_path() . '/resources/reports';
+        $options = [
+            'format' => ['pdf'],
+            'locale' => 'es',
+            'params' => $params
+        ];
+
+        $pdfFile = $output . '/' . $jasperName . '.pdf';
+        if (file_exists($pdfFile)) {
+            unlink($pdfFile);
+        }
+        $jasper = new PHPJasper;
+        $jasper->process(
+            $input,
+            $output,
+            $options
+        )->execute();
+
+        $headers = ['Content-Type: application/pdf'];
+        return response()->download($pdfFile, $downloadName, $headers);
+    }
+
     //***************************************
     //               ____
     //              |  _ \
