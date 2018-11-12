@@ -1,34 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="remito" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a4bb7c43-edb4-40d0-8f58-9fd072ac49c5">
-	<property name="ireport.zoom" value="1.0"/>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="remito" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a4bb7c43-edb4-40d0-8f58-9fd072ac49c5">
+	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<subDataset name="Table Dataset 1" uuid="397191df-2be4-45a4-a3e3-ec8943e391b8"/>
-	<parameter name="qr" class="java.awt.Image"/>
-	<parameter name="numero" class="java.lang.String"/>
-	<parameter name="fecha" class="java.lang.String"/>
-	<parameter name="depositoDireccion" class="java.lang.String"/>
-	<parameter name="depositoTelefono" class="java.lang.String"/>
-	<parameter name="destinatario" class="java.lang.String"/>
-	<parameter name="destinatarioDireccion" class="java.lang.String"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JsonAdapter"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String"/>
+	<queryString language="json">
+		<![CDATA[remito]]>
+	</queryString>
+	<field name="numero" class="java.lang.String"/>
+	<field name="fecha" class="java.lang.String"/>
+	<field name="depositoDireccion" class="java.lang.String"/>
+	<field name="depositoTelefono" class="java.lang.String"/>
+	<field name="destinatario" class="java.lang.String"/>
+	<field name="destinatarioDireccion" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="354" splitType="Stretch">
+		<band height="185" splitType="Stretch">
 			<rectangle>
 				<reportElement mode="Transparent" x="300" y="0" width="145" height="20" uuid="945b8170-214f-40e0-8e11-81d340c018fa"/>
 			</rectangle>
 			<textField>
 				<reportElement x="305" y="5" width="140" height="20" uuid="d00e1fd2-654f-4125-b5e5-7b142f6ac930"/>
-				<textFieldExpression><![CDATA["REMITO N°: " + $P{numero}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["REMITO N°: " + $F{numero}]]></textFieldExpression>
 			</textField>
 			<rectangle>
 				<reportElement mode="Transparent" x="445" y="0" width="110" height="20" uuid="e810954a-dec5-4dac-88f9-92c403578844"/>
 			</rectangle>
 			<textField>
 				<reportElement x="450" y="5" width="105" height="20" uuid="7a4a1714-6fbb-4d92-9546-6ad69b2895c4"/>
-				<textFieldExpression><![CDATA["FECHA: " + $P{fecha}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["FECHA: " + $F{fecha}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="36" width="555" height="18" uuid="b1b24ac2-f6b3-498f-bc9f-32bd3ecc96f1"/>
@@ -46,12 +49,12 @@
 			</staticText>
 			<textField>
 				<reportElement x="0" y="87" width="410" height="20" uuid="3d409bb3-3ebc-45f4-adc3-b90753f8c0c0"/>
-				<textFieldExpression><![CDATA["Depósito de " + $P{depositoDireccion}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Depósito de " + $F{depositoDireccion}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="410" y="87" width="145" height="20" uuid="41f35978-1385-443c-be46-582af0dbae29"/>
 				<textElement textAlignment="Right"/>
-				<textFieldExpression><![CDATA["Tel. " + $P{depositoTelefono}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Tel. " + $F{depositoTelefono}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="107" width="91" height="20" uuid="0c5356c7-c43e-4cef-bcbe-7a9eb42fbd3c"/>
@@ -69,137 +72,17 @@
 			</staticText>
 			<textField>
 				<reportElement x="91" y="107" width="464" height="20" uuid="87f575ed-05f9-42fb-8da7-45040853c309"/>
-				<textFieldExpression><![CDATA[$P{destinatario}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{destinatario}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="91" y="127" width="464" height="20" uuid="aab0b7ec-9024-49a7-ae95-d9d1aff97f63"/>
-				<textFieldExpression><![CDATA[$P{destinatarioDireccion}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{destinatarioDireccion}]]></textFieldExpression>
 			</textField>
-			<componentElement>
-				<reportElement key="table" x="0" y="158" width="555" height="80" uuid="608e8961-73d1-4ef2-9cb4-7df9162c6a43"/>
-				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="Table Dataset 1" uuid="86c9654f-73c1-4cab-98f5-27c2135796fb">
-						<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource(1)]]></dataSourceExpression>
-					</datasetRun>
-					<jr:column width="90" uuid="a4ca7964-4bd9-4291-8b1c-88b7c59f0528">
-						<jr:tableFooter height="30" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.25"/>
-								<leftPen lineWidth="0.25"/>
-								<bottomPen lineWidth="0.25"/>
-								<rightPen lineWidth="0.25"/>
-							</box>
-						</jr:tableFooter>
-						<jr:columnHeader height="24" rowSpan="1">
-							<box>
-								<topPen lineWidth="1.0"/>
-								<leftPen lineWidth="1.0"/>
-								<bottomPen lineWidth="1.0"/>
-								<rightPen lineWidth="1.0"/>
-							</box>
-							<staticText>
-								<reportElement x="5" y="5" width="85" height="19" uuid="47de0b8a-d485-4acc-85b2-dd7bb0488620"/>
-								<textElement>
-									<font size="12" isBold="true"/>
-								</textElement>
-								<text><![CDATA[COD]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="20" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.25"/>
-								<leftPen lineWidth="0.25"/>
-								<bottomPen lineWidth="0.25"/>
-								<rightPen lineWidth="0.25"/>
-							</box>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="353" uuid="855a6d38-bbeb-4c2c-bdb1-f541991e957e">
-						<jr:tableFooter height="30" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.25"/>
-								<leftPen lineWidth="0.25"/>
-								<bottomPen lineWidth="0.25"/>
-								<rightPen lineWidth="0.25"/>
-							</box>
-						</jr:tableFooter>
-						<jr:columnHeader height="24" rowSpan="1">
-							<box>
-								<topPen lineWidth="1.0"/>
-								<leftPen lineWidth="1.0"/>
-								<bottomPen lineWidth="1.0"/>
-								<rightPen lineWidth="1.0"/>
-							</box>
-							<staticText>
-								<reportElement x="5" y="5" width="348" height="19" uuid="64f1d5cc-d5a9-4878-b057-5e9321a09466"/>
-								<textElement textAlignment="Center">
-									<font size="12" isBold="true"/>
-								</textElement>
-								<text><![CDATA[DESCRIPCION]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="20" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.25"/>
-								<leftPen lineWidth="0.25"/>
-								<bottomPen lineWidth="0.25"/>
-								<rightPen lineWidth="0.25"/>
-							</box>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="90" uuid="341d2e44-42a8-48ac-bfc3-8e1de247f9f8">
-						<jr:tableFooter height="30" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.25"/>
-								<leftPen lineWidth="0.25"/>
-								<bottomPen lineWidth="0.25"/>
-								<rightPen lineWidth="0.25"/>
-							</box>
-						</jr:tableFooter>
-						<jr:columnHeader height="24" rowSpan="1">
-							<box>
-								<topPen lineWidth="1.0"/>
-								<leftPen lineWidth="1.0"/>
-								<bottomPen lineWidth="1.0"/>
-								<rightPen lineWidth="1.0"/>
-							</box>
-							<staticText>
-								<reportElement x="5" y="5" width="85" height="19" uuid="dfc81407-0603-4925-bb72-74e7443e3787"/>
-								<textElement textAlignment="Center">
-									<font size="12" isBold="true"/>
-								</textElement>
-								<text><![CDATA[CANTIDAD]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="20" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.25"/>
-								<leftPen lineWidth="0.25"/>
-								<bottomPen lineWidth="0.25"/>
-								<rightPen lineWidth="0.25"/>
-							</box>
-						</jr:detailCell>
-					</jr:column>
-				</jr:table>
-			</componentElement>
+			<subreport>
+				<reportElement x="0" y="159" width="555" height="18" isRemoveLineWhenBlank="true" backcolor="#FFCC99" uuid="4eb7e220-6758-465f-83c9-45cdfecc33eb"/>
+				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JsonDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("detalle")]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "/remito_detalle.jasper"]]></subreportExpression>
+			</subreport>
 		</band>
 	</title>
-	<pageHeader>
-		<band height="35" splitType="Stretch"/>
-	</pageHeader>
-	<columnHeader>
-		<band height="61" splitType="Stretch"/>
-	</columnHeader>
-	<detail>
-		<band height="125" splitType="Stretch"/>
-	</detail>
-	<columnFooter>
-		<band height="45" splitType="Stretch"/>
-	</columnFooter>
-	<pageFooter>
-		<band height="54" splitType="Stretch"/>
-	</pageFooter>
-	<summary>
-		<band height="42" splitType="Stretch"/>
-	</summary>
 </jasperReport>

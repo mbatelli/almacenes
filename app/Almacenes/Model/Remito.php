@@ -48,4 +48,9 @@ class Remito extends Model
     {
         return $this->belongsTo('App\Almacenes\Model\OrdenCompra');
     }
+
+    public function detalle()
+    {
+        return $this->hasMany('App\Almacenes\Model\RemitoLinea');
+    }
 }

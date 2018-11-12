@@ -41,20 +41,45 @@ class RemitoController extends VoyagerBaseController
     }
 
     public function print(Request $request, $id) {
-        $remito = Remito::findOrFail($id);
-        $fecha = \DateTime::createFromFormat('Y-m-d', $remito->fecha);
-        $params = [
-            'numero' => str_pad($remito->depositoId->punto_venta, 3, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 3, '0', STR_PAD_LEFT),
-            'fecha' => $fecha->format("d/m/Y"),
-            'depositoDireccion' => $remito->depositoId->direccion." ".$remito->depositoId->ciudadId->nombre,
-            'depositoTelefono' => $remito->depositoId->telefono,
-            'destinatario' => $remito->destinatarioId->nombre,
-            'destinatarioDireccion' => $remito->destinatarioId->direccion." ".$remito->destinatarioId->ciudadId->nombre
+        $remito = Remito::with('depositoId','depositoId.ciudadId','destinatarioId','destinatarioId.ciudadId','detalle','detalle.articulo')->findOrFail($id);
+        $detalle = [];
+        foreach ($remito->detalle->all() as $item) {
+            array_push($detalle, [
+                'articulo' => $item->articulo->nombre,
+                'cantidad' => $item->cantidad
+            ]);
+        }        
+        $data = [
+            'remito' => [
+                'numero' => str_pad($remito->depositoId->punto_venta, 3, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 3, '0', STR_PAD_LEFT),
+                'fecha' => \DateTime::createFromFormat('Y-m-d', $remito->fecha),
+                'depositoDireccion' => $remito->depositoId->direccion." ".$remito->depositoId->ciudadId->nombre,
+                'depositoTelefono' => $remito->depositoId->telefono,
+                'destinatario' => $remito->destinatarioId->nombre,
+                'destinatarioDireccion' => $remito->destinatarioId->direccion." ".$remito->destinatarioId->ciudadId->nombre,
+                'detalle' => $detalle
+            ]
         ];
+        $jsondata = json_encode($data, JSON_PRETTY_PRINT);
+        $data_file = $this->getReportPath() . '/remito.json';
+        file_put_contents($data_file, $jsondata);
+        $options = [
+            'format' => ['pdf'],
+            'locale' => 'es',
+            'params' => [
+                'SUBREPORT_DIR' => $this->getReportPath()
+            ],
+            'db_connection' => [
+                'driver' => 'json',
+                'data_file' => $data_file,
+                'json_query' => 'remito'
+            ]            
+        ];
+
 
         $jasperName = 'remito';
         $downloadName = sprintf("Remito %s.pdf", $remito->numero);
-        return $this->printJasperToPDF($jasperName, $params, $downloadName);
+        return $this->printJasperToPDF($jasperName, $options, $downloadName);
     }
 
     /*
