@@ -67,7 +67,7 @@ class RemitoController extends VoyagerBaseController
             'format' => ['pdf'],
             'locale' => 'es',
             'params' => [
-                'SUBREPORT_DIR' => $this->getReportPath()
+                'REPORT_DIR' => $this->getReportPath()
             ],
             'db_connection' => [
                 'driver' => 'json',

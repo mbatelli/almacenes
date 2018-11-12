@@ -4,7 +4,7 @@
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JsonAdapter"/>
-	<parameter name="SUBREPORT_DIR" class="java.lang.String"/>
+	<parameter name="REPORT_DIR" class="java.lang.String"/>
 	<queryString language="json">
 		<![CDATA[remito]]>
 	</queryString>
@@ -81,8 +81,12 @@
 			<subreport>
 				<reportElement x="0" y="159" width="555" height="18" isRemoveLineWhenBlank="true" backcolor="#FFCC99" uuid="4eb7e220-6758-465f-83c9-45cdfecc33eb"/>
 				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JsonDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("detalle")]]></dataSourceExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "/remito_detalle.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA[$P{REPORT_DIR} + "/remito_detalle.jasper"]]></subreportExpression>
 			</subreport>
+			<image>
+				<reportElement x="0" y="0" width="197" height="57" uuid="a88ea777-b3c7-4679-8665-6b648c3b9695"/>
+				<imageExpression><![CDATA[$P{REPORT_DIR} + "/logo.png"]]></imageExpression>
+			</image>
 		</band>
 	</title>
 </jasperReport>
