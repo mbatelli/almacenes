@@ -26,6 +26,6 @@ class Destinatario extends Model
      */
     public function ciudadId()
     {
-        return $this->belongsTo('App\Almacenes\Model\Ciudad');
+        return $this->belongsTo('App\Almacenes\Model\Ciudad','ciudad_id');
     }
 }

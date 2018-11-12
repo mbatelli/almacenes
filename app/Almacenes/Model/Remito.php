@@ -14,7 +14,7 @@ class Remito extends Model
      */
     public function depositoId()
     {
-        return $this->belongsTo('App\Almacenes\Model\Deposito');
+        return $this->belongsTo('App\Almacenes\Model\Deposito','deposito_id');
     }
 
     /**
@@ -22,7 +22,7 @@ class Remito extends Model
      */
     public function destinatarioId()
     {
-        return $this->belongsTo('App\Almacenes\Model\Destinatario');
+        return $this->belongsTo('App\Almacenes\Model\Destinatario','destinatario_id');
     }
 
     /**

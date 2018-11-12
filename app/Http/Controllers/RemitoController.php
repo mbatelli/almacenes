@@ -16,6 +16,8 @@ use App\Http\Controllers\Voyager\VoyagerBaseController;
 use Yajra\DataTables\DataTables;
 use App\Almacenes\Model\RemitoLinea;
 use App\Almacenes\Model\Remito;
+use App\Almacenes\Model\Deposito;
+use App\Almacenes\Model\Ciudad;
 use App\Almacenes\Model\Articulo;
 use App\Almacenes\Actions\PrintAction;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -40,10 +42,17 @@ class RemitoController extends VoyagerBaseController
 
     public function print(Request $request, $id) {
         $remito = Remito::findOrFail($id);
-        $jasperName = 'remito';
+        $fecha = \DateTime::createFromFormat('Y-m-d', $remito->fecha);
         $params = [
-            'numero' => $remito->numero
+            'numero' => str_pad($remito->depositoId->punto_venta, 3, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 3, '0', STR_PAD_LEFT),
+            'fecha' => $fecha->format("d/m/Y"),
+            'depositoDireccion' => $remito->depositoId->direccion." ".$remito->depositoId->ciudadId->nombre,
+            'depositoTelefono' => $remito->depositoId->telefono,
+            'destinatario' => $remito->destinatarioId->nombre,
+            'destinatarioDireccion' => $remito->destinatarioId->direccion." ".$remito->destinatarioId->ciudadId->nombre
         ];
+
+        $jasperName = 'remito';
         $downloadName = sprintf("Remito %s.pdf", $remito->numero);
         return $this->printJasperToPDF($jasperName, $params, $downloadName);
     }
