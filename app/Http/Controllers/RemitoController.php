@@ -45,6 +45,7 @@ class RemitoController extends VoyagerBaseController
         $detalle = [];
         foreach ($remito->detalle->all() as $item) {
             array_push($detalle, [
+                'codigo' => $item->articulo->codigo,
                 'articulo' => $item->articulo->nombre,
                 'cantidad' => $item->cantidad
             ]);
@@ -52,11 +53,17 @@ class RemitoController extends VoyagerBaseController
         $data = [
             'remito' => [
                 'numero' => str_pad($remito->depositoId->punto_venta, 3, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 3, '0', STR_PAD_LEFT),
-                'fecha' => \DateTime::createFromFormat('Y-m-d', $remito->fecha),
+                'fecha' => \DateTime::createFromFormat('Y-m-d', $remito->fecha)->format('d/m/Y'),
                 'depositoDireccion' => $remito->depositoId->direccion." ".$remito->depositoId->ciudadId->nombre,
                 'depositoTelefono' => $remito->depositoId->telefono,
                 'destinatario' => $remito->destinatarioId->nombre,
                 'destinatarioDireccion' => $remito->destinatarioId->direccion." ".$remito->destinatarioId->ciudadId->nombre,
+                'nota' => "El envio consta de ".(is_null($remito->cantidad_bultos)?"0":$remito->cantidad_bultos)." bultos, ".(is_null($remito->peso)?"0":$remito->peso)." Kg y ".(is_null($remito->volumen)?"0":$remito->volumen)." m3. Precintos N°: ".(is_null($remito->precintos)?"":$remito->precintos)." ".(is_null($remito->nota)?"":$remito->nota),
+                'transportador' => $remito->transportador,
+                'patente' => $remito->patente,
+                'conductor' => $remito->conductor,
+                'conductorDNI' => $remito->dni,
+                'conductorTel' => $remito->telefono,
                 'detalle' => $detalle
             ]
         ];

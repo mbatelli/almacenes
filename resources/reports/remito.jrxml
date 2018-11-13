@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="remito" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a4bb7c43-edb4-40d0-8f58-9fd072ac49c5">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="48"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JsonAdapter"/>
 	<parameter name="REPORT_DIR" class="java.lang.String"/>
 	<queryString language="json">
@@ -14,79 +14,226 @@
 	<field name="depositoTelefono" class="java.lang.String"/>
 	<field name="destinatario" class="java.lang.String"/>
 	<field name="destinatarioDireccion" class="java.lang.String"/>
+	<field name="nota" class="java.lang.String"/>
+	<field name="transportador" class="java.lang.String"/>
+	<field name="patente" class="java.lang.String"/>
+	<field name="conductor" class="java.lang.String"/>
+	<field name="conductorDNI" class="java.lang.String"/>
+	<field name="conductorTel" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="185" splitType="Stretch">
+		<band height="190" splitType="Stretch">
 			<rectangle>
-				<reportElement mode="Transparent" x="300" y="0" width="145" height="20" uuid="945b8170-214f-40e0-8e11-81d340c018fa"/>
+				<reportElement mode="Transparent" x="300" y="30" width="145" height="20" uuid="945b8170-214f-40e0-8e11-81d340c018fa"/>
 			</rectangle>
 			<textField>
-				<reportElement x="305" y="5" width="140" height="20" uuid="d00e1fd2-654f-4125-b5e5-7b142f6ac930"/>
+				<reportElement x="300" y="30" width="145" height="20" uuid="d00e1fd2-654f-4125-b5e5-7b142f6ac930"/>
+				<box topPadding="5" leftPadding="5" rightPadding="2"/>
 				<textFieldExpression><![CDATA["REMITO N°: " + $F{numero}]]></textFieldExpression>
 			</textField>
 			<rectangle>
-				<reportElement mode="Transparent" x="445" y="0" width="110" height="20" uuid="e810954a-dec5-4dac-88f9-92c403578844"/>
+				<reportElement mode="Transparent" x="445" y="30" width="110" height="20" uuid="e810954a-dec5-4dac-88f9-92c403578844"/>
 			</rectangle>
 			<textField>
-				<reportElement x="450" y="5" width="105" height="20" uuid="7a4a1714-6fbb-4d92-9546-6ad69b2895c4"/>
+				<reportElement x="445" y="30" width="110" height="20" uuid="7a4a1714-6fbb-4d92-9546-6ad69b2895c4"/>
+				<box topPadding="5" leftPadding="5" rightPadding="2"/>
 				<textFieldExpression><![CDATA["FECHA: " + $F{fecha}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="36" width="555" height="18" uuid="b1b24ac2-f6b3-498f-bc9f-32bd3ecc96f1"/>
+				<reportElement x="0" y="66" width="555" height="18" uuid="b1b24ac2-f6b3-498f-bc9f-32bd3ecc96f1"/>
 				<textElement textAlignment="Center">
 					<font size="13" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Dirección Nacional Electoral]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="54" width="555" height="16" uuid="c2427986-c323-4eb7-bb54-c3aeb9105901"/>
+				<reportElement x="0" y="84" width="555" height="16" uuid="c2427986-c323-4eb7-bb54-c3aeb9105901"/>
 				<textElement textAlignment="Center">
 					<font isBold="false"/>
 				</textElement>
 				<text><![CDATA[Dirección de Procesos Electorales]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="0" y="87" width="410" height="20" uuid="3d409bb3-3ebc-45f4-adc3-b90753f8c0c0"/>
+				<reportElement x="0" y="117" width="410" height="20" uuid="3d409bb3-3ebc-45f4-adc3-b90753f8c0c0"/>
 				<textFieldExpression><![CDATA["Depósito de " + $F{depositoDireccion}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="410" y="87" width="145" height="20" uuid="41f35978-1385-443c-be46-582af0dbae29"/>
+				<reportElement x="410" y="117" width="145" height="20" uuid="41f35978-1385-443c-be46-582af0dbae29"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Tel. " + $F{depositoTelefono}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="107" width="91" height="20" uuid="0c5356c7-c43e-4cef-bcbe-7a9eb42fbd3c"/>
+				<reportElement x="0" y="137" width="91" height="20" uuid="0c5356c7-c43e-4cef-bcbe-7a9eb42fbd3c"/>
 				<textElement>
 					<font isBold="true" isUnderline="true"/>
 				</textElement>
 				<text><![CDATA[DESTINATARIO:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="127" width="91" height="20" uuid="11057084-ad52-4c74-9520-390eb4be4ef0"/>
+				<reportElement x="0" y="157" width="91" height="20" uuid="11057084-ad52-4c74-9520-390eb4be4ef0"/>
 				<textElement>
 					<font isBold="true" isUnderline="true"/>
 				</textElement>
 				<text><![CDATA[DIRECCION:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="91" y="107" width="464" height="20" uuid="87f575ed-05f9-42fb-8da7-45040853c309"/>
+				<reportElement x="91" y="137" width="464" height="20" uuid="87f575ed-05f9-42fb-8da7-45040853c309"/>
 				<textFieldExpression><![CDATA[$F{destinatario}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="91" y="127" width="464" height="20" uuid="aab0b7ec-9024-49a7-ae95-d9d1aff97f63"/>
+				<reportElement x="91" y="157" width="464" height="20" uuid="aab0b7ec-9024-49a7-ae95-d9d1aff97f63"/>
 				<textFieldExpression><![CDATA[$F{destinatarioDireccion}]]></textFieldExpression>
 			</textField>
-			<subreport>
-				<reportElement x="0" y="159" width="555" height="18" isRemoveLineWhenBlank="true" backcolor="#FFCC99" uuid="4eb7e220-6758-465f-83c9-45cdfecc33eb"/>
-				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JsonDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("detalle")]]></dataSourceExpression>
-				<subreportExpression><![CDATA[$P{REPORT_DIR} + "/remito_detalle.jasper"]]></subreportExpression>
-			</subreport>
 			<image>
 				<reportElement x="0" y="0" width="197" height="57" uuid="a88ea777-b3c7-4679-8665-6b648c3b9695"/>
 				<imageExpression><![CDATA[$P{REPORT_DIR} + "/logo.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>
+	<detail>
+		<band height="34">
+			<subreport>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="555" height="32" isRemoveLineWhenBlank="true" backcolor="#FFCC99" uuid="4eb7e220-6758-465f-83c9-45cdfecc33eb"/>
+				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JsonDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("detalle")]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{REPORT_DIR} + "/remito_detalle.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="30">
+			<staticText>
+				<reportElement x="0" y="0" width="50" height="18" uuid="86a534a0-a211-4829-b3e0-5e7ff3a0e267"/>
+				<box topPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nota:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="0" width="505" height="18" uuid="17d50fb6-b55f-496e-b8c7-1548343c95a9"/>
+				<box topPadding="2" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nota}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="222">
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="1" width="555" height="104" uuid="c7428ceb-f914-48bb-b7b7-0257d0bccaf2"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="15" width="111" height="20" uuid="2357ec27-c71e-451d-8bf2-99d3b9d4a4db"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[TRANSPORTADOR:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="111" y="15" width="293" height="20" uuid="321b2e03-2488-47ed-92c6-be1d2026c73e"/>
+				<textFieldExpression><![CDATA[$F{transportador}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="404" y="15" width="57" height="20" uuid="7dbb873d-0f84-4d03-9cce-a0eba77110ff"/>
+				<textElement>
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[PATENTE:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="461" y="15" width="94" height="20" uuid="978e0c39-a86a-41df-bde5-889be3c00fb3"/>
+				<textFieldExpression><![CDATA[$F{patente}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="45" width="101" height="20" uuid="634ea659-1393-4a75-b97a-0efee83f42aa"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[CONDUCTOR:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="111" y="45" width="444" height="20" uuid="94160ebc-8ab8-4768-b1f0-ee18b5b62246"/>
+				<textFieldExpression><![CDATA[$F{conductor}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="65" width="101" height="20" uuid="8b29a9df-f6c9-439d-bf9f-c91a6e3e06a6"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[DNI:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="111" y="65" width="194" height="20" uuid="596ccb05-b973-4f89-b824-986f03fcd7f9"/>
+				<textFieldExpression><![CDATA[$F{conductorDNI}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="85" width="101" height="20" uuid="1636ba82-ec38-48e8-b514-e072904d6e72"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[TEL:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="111" y="85" width="194" height="20" uuid="a3f61bf0-d80b-4f32-8190-763145bf7a85"/>
+				<textFieldExpression><![CDATA[$F{conductorTel}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="349" y="85" width="180" height="20" uuid="c1ad89b2-7b51-472d-ac63-fcb12a99fa24"/>
+				<box>
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[FIRMA DEL CHOFER]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="105" width="555" height="116" uuid="8e388259-7b27-4c55-b8b7-c0033c29f7fe"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="1" y="115" width="554" height="14" uuid="123c3a24-66e9-4b4b-913d-3059d3946ecd"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Center">
+					<font isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[AUTORIDAD O FUNCIONARIO JUDICIAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="155" width="159" height="20" uuid="1908a26b-69e5-4955-aca4-09c904c4c75c"/>
+				<box leftPadding="2"/>
+				<textElement>
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[RECIBIDO CONFORME:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="315" y="175" width="214" height="20" uuid="2e1bb822-f90a-4616-8136-0aabbf9b6aca"/>
+				<box>
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[FIRMA Y ACLARACION]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
 </jasperReport>
