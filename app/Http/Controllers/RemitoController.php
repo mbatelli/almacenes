@@ -41,7 +41,13 @@ class RemitoController extends VoyagerBaseController
     }
 
     public function print(Request $request, $id) {
-        $remito = Remito::with('depositoId','depositoId.ciudadId','destinatarioId','destinatarioId.ciudadId','detalle','detalle.articulo')->findOrFail($id);
+        $remito = Remito::with(
+            'depositoId',
+            'depositoId.ciudadId',
+            'destinatarioId',
+            'destinatarioId.ciudadId',
+            'detalle',
+            'detalle.articulo')->findOrFail($id);
         $detalle = [];
         foreach ($remito->detalle->all() as $item) {
             array_push($detalle, [
@@ -49,7 +55,8 @@ class RemitoController extends VoyagerBaseController
                 'articulo' => $item->articulo->nombre,
                 'cantidad' => $item->cantidad
             ]);
-        }        
+        }
+
         $data = [
             'remito' => [
                 'numero' => str_pad($remito->depositoId->punto_venta, 3, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 3, '0', STR_PAD_LEFT),
@@ -64,6 +71,7 @@ class RemitoController extends VoyagerBaseController
                 'conductor' => $remito->conductor,
                 'conductorDNI' => $remito->dni,
                 'conductorTel' => $remito->telefono,
+                'qr' => $this->generateQR($remito),
                 'detalle' => $detalle
             ]
         ];
@@ -96,9 +104,10 @@ class RemitoController extends VoyagerBaseController
     ];
     */
     private function generateQR($remito) {
+        $data = str_pad($remito->depositoId->punto_venta, 3, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 3, '0', STR_PAD_LEFT);
         // Create a basic QR code
-        $qrCode = new QrCode('123456');
-        $qrCode->setSize(300);
+        $qrCode = new QrCode($data);
+        $qrCode->setSize(100);
 
         // Set advanced options
         $qrCode->setWriterByName('png');
