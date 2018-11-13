@@ -101,12 +101,6 @@ class RemitoController extends VoyagerBaseController
         return $this->printJasperToPDF($jasperName, $options, $downloadName);
     }
 
-    /*
-    $params = [
-        'numero' => 123456,
-        'qr' => $this->generateQR($remito)
-    ];
-    */
     private function generateQR($data) {
         // Create a basic QR code
         $qrCode = new QrCode($data['remito']['numero']);
