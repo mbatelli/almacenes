@@ -41,6 +41,7 @@ class RemitoController extends VoyagerBaseController
     }
 
     public function print(Request $request, $id) {
+        // Traemos remito con relaciones eager
         $remito = Remito::with(
             'depositoId',
             'depositoId.ciudadId',
@@ -57,6 +58,7 @@ class RemitoController extends VoyagerBaseController
             ]);
         }
 
+        // Armamos arreglo de datos con info que se usara en el reporte
         $data = [
             'remito' => [
                 'numero' => str_pad($remito->depositoId->punto_venta, 3, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 3, '0', STR_PAD_LEFT),
@@ -71,13 +73,17 @@ class RemitoController extends VoyagerBaseController
                 'conductor' => $remito->conductor,
                 'conductorDNI' => $remito->dni,
                 'conductorTel' => $remito->telefono,
-                'qr' => $this->generateQR($remito),
                 'detalle' => $detalle
             ]
         ];
+        $data['remito']['qr'] = $this->generateQR($data);
+        // Codificamos como json
         $jsondata = json_encode($data, JSON_PRETTY_PRINT);
+        // Grabamos en disco misma ubicación que el reporte
         $data_file = $this->getReportPath() . '/remito.json';
         file_put_contents($data_file, $jsondata);
+
+        // Armamos opciones para jasper
         $options = [
             'format' => ['pdf'],
             'locale' => 'es',
@@ -90,8 +96,6 @@ class RemitoController extends VoyagerBaseController
                 'json_query' => 'remito'
             ]            
         ];
-
-
         $jasperName = 'remito';
         $downloadName = sprintf("Remito %s.pdf", $remito->numero);
         return $this->printJasperToPDF($jasperName, $options, $downloadName);
@@ -103,10 +107,9 @@ class RemitoController extends VoyagerBaseController
         'qr' => $this->generateQR($remito)
     ];
     */
-    private function generateQR($remito) {
-        $data = str_pad($remito->depositoId->punto_venta, 3, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 3, '0', STR_PAD_LEFT);
+    private function generateQR($data) {
         // Create a basic QR code
-        $qrCode = new QrCode($data);
+        $qrCode = new QrCode($data['remito']['numero']);
         $qrCode->setSize(100);
 
         // Set advanced options
