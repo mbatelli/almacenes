@@ -280,19 +280,26 @@ class VoyagerBaseController extends BaseVoyagerBaseController
 
         $displayName = count($ids) > 1 ? $dataType->display_name_plural : $dataType->display_name_singular;
 
-        $res = $data->destroy($ids);
-        $data = $res
-            ? [
-                'message'    => __('voyager::generic.successfully_deleted')." {$displayName}",
-                'alert-type' => 'success',
-            ]
-            : [
-                'message'    => __('voyager::generic.error_deleting')." {$displayName}",
-                'alert-type' => 'error',
-            ];
+        try {
+            $res = $data->destroy($ids);
+            $data = $res
+                ? [
+                    'message'    => __('voyager::generic.successfully_deleted')." {$displayName}",
+                    'alert-type' => 'success',
+                ]
+                : [
+                    'message'    => __('voyager::generic.error_deleting')." {$displayName}",
+                    'alert-type' => 'error',
+                ];
 
-        if ($res) {
-            event(new BreadDataDeleted($dataType, $data));
+            if ($res) {
+                event(new BreadDataDeleted($dataType, $data));
+            }
+        } catch (\Illuminate\Database\QueryException $e){
+            $data = [
+                    'message'    => __('voyager::generic.error_deleting')." {$displayName}",
+                    'alert-type' => 'error',
+                ];            
         }
 
         return redirect()->route("{$dataType->slug}.index")->with($data);
