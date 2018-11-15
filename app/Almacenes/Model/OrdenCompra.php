@@ -17,7 +17,7 @@ class OrdenCompra extends Model
         return $this->belongsTo('App\Almacenes\Model\Proveedor');
     }
 
-    public function lineas()
+    public function detalle()
     {
         return $this->hasMany('App\Almacenes\Model\OrdenCompraLinea');
     }

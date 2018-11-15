@@ -28,7 +28,8 @@ class VoyagerBaseController extends BaseVoyagerBaseController
             } else {
                 $slug = explode('.', $request->route()->getName())[1];
             }
-
+            if($slug == null)
+                $slug = explode('/', $request->route()->uri)[0];
         }
 
         return $slug;

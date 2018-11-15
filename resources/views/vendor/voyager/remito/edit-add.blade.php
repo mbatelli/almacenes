@@ -257,16 +257,15 @@
                             </div>
                         </div>
                         <div class="panel-body">
-                            <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
+                            <table id="detalle-table" class="table table-bordered compact stripe" style="width:100%">
                                 <thead>
                                     <tr>
                                         <th style='vertical-align: middle; width: 50px;'>#</th>
-                                        <th style='vertical-align: middle;'>Articulo</th>
+                                        <th style='vertical-align: middle;'>Artículo</th>
                                         <th style='vertical-align: middle;'>Cantidad</th>
-                                        <th style='vertical-align: middle;'>Precio</th>
                                         <th style='vertical-align: middle; width: 150px;'>
                                             <a href="#modalForm" data-toggle="modal" title="Nuevo" 
-                                               data-href="{{ url('orden-compra-linea/create') }}/{{ $dataTypeContent->getKey() }}"
+                                               data-href="{{ url('remito-linea/create') }}/{{ $dataTypeContent->getKey() }}"
                                                class="btn btn-sm btn-success" style="text-decoration:none;">
                                                     <i class="voyager-plus"></i>
                                             </a>
@@ -274,6 +273,50 @@
                                     </tr>
                                 </thead>
                             </table>
+
+                            <div class="loading">
+                                <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i><br/>
+                                <span>Cargando</span>
+                            </div>
+
+                            <script>
+                                $(function() {
+                                    $('#detalle-table').DataTable({
+                                        language: {
+                                            url: '/i18n/datatables/spanish.json'
+                                        },
+                                        paging: false,
+                                        processing: true,
+                                        serverSide: true,
+                                        ajax: '{!! url('remito-detalle?parent_id=') !!}{{ $dataTypeContent->getKey() }}',
+                                        columns: [
+                                            { data: 'rownum',            name: 'rownum', orderable: false, searchable: false },
+                                            { data: 'articulo.nombre',   name: 'articulo.nombre' },
+                                            { data: 'cantidad',          name: 'cantidad' },
+                                            { data: 'action',            name: 'action', orderable: false, searchable: false }
+                                        ],
+                                        columnDefs: [
+                                            {
+                                                targets: 0,
+                                                className: 'dt-head-center dt-body-right'
+                                            },
+                                            {
+                                                targets: 1,
+                                                className: 'dt-head-center dt-body-left'
+                                            },
+                                            {
+                                                targets: 2,
+                                                className: 'dt-head-center dt-body-right'
+                                            },
+                                            {
+                                                targets: 3,
+                                                className: 'dt-head-center dt-body-center'
+                                            }
+                                        ]                                    
+                                    });
+                                });
+                            </script>
+
                         </div>
                     </div>
                 </form>
@@ -306,7 +349,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
                     <button type="button" class="btn btn-danger" id="confirm_delete"
-                            onclick="ajaxDelete('{{url('orden-compra-linea/delete')}}/'+$('#delete_id').val(),$('#delete_token').val())">>
+                            onclick="ajaxDelete('{{url('remito-linea/delete')}}/'+$('#delete_id').val(),$('#delete_token').val())">>
                             {{ __('voyager::generic.delete_confirm') }}</button>
                 </div>
             </div>

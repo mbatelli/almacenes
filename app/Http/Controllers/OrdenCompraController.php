@@ -13,7 +13,6 @@ use TCG\Voyager\Events\BreadImagesDeleted;
 use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\Traits\BreadRelationshipParser;
 use App\Http\Controllers\Voyager\VoyagerBaseController;
-use App\DataTables\OrdenCompraLineasDataTable;
 use Yajra\DataTables\DataTables;
 use App\Almacenes\Model\OrdenCompraLinea;
 use App\Almacenes\Model\OrdenCompra;
@@ -21,89 +20,13 @@ use App\Almacenes\Model\Articulo;
 
 class OrdenCompraController extends VoyagerBaseController
 {
-    public function getSlug(Request $request)
+    public function detalle(Request $request)
     {
-        $slug = parent::getSlug($request);
-        if($slug == null)
-            $slug = explode('/', $request->route()->uri)[0];
-        return $slug;
-    }
-
-    public function edit(Request $request, $id)
-    {
-        $slug = $this->getSlug($request);
-
-        $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
-
-        $relationships = $this->getRelationships($dataType);
-
-        $dataTypeContent = (strlen($dataType->model_name) != 0)
-            ? app($dataType->model_name)->with($relationships)->findOrFail($id)
-            : DB::table($dataType->name)->where('id', $id)->first(); // If Model doest exist, get data from table name
-
-        foreach ($dataType->editRows as $key => $row) {
-            $details = json_decode($row->details);
-            $dataType->editRows[$key]['col_width'] = isset($details->width) ? $details->width : 100;
-        }
-
-        // If a column has a relationship associated with it, we do not want to show that field
-        $this->removeRelationshipField($dataType, 'edit');
-
-        // Check permission
-        $this->authorize('edit', $dataTypeContent);
-
-        // Check if BREAD is Translatable
-        $isModelTranslatable = is_bread_translatable($dataTypeContent);
-
-        $view = 'voyager::bread.edit-add';
-
-        if (view()->exists("voyager::$slug.edit-add")) {
-            $view = "voyager::$slug.edit-add";
-        }
-
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
-    }
-
-    public function create(Request $request)
-    {
-        $slug = $this->getSlug($request);
-
-        $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
-
-        // Check permission
-        $this->authorize('add', app($dataType->model_name));
-
-        $dataTypeContent = (strlen($dataType->model_name) != 0)
-                            ? new $dataType->model_name()
-                            : false;
-
-        foreach ($dataType->addRows as $key => $row) {
-            $details = json_decode($row->details);
-            $dataType->addRows[$key]['col_width'] = isset($details->width) ? $details->width : 100;
-        }
-
-        // If a column has a relationship associated with it, we do not want to show that field
-        $this->removeRelationshipField($dataType, 'add');
-
-        // Check if BREAD is Translatable
-        $isModelTranslatable = is_bread_translatable($dataTypeContent);
-
-        $view = 'voyager::bread.edit-add';
-
-        if (view()->exists("voyager::$slug.edit-add")) {
-            $view = "voyager::$slug.edit-add";
-        }
-
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
-    }
-
-    public function ordenCompraLinea(Request $request, DataTables $dataTables)
-    {
-        $ordenCompraId = $request->input('orden_compra_id');
+        $parentId = $request->input('parent_id');
         DB::statement(DB::raw('set @rownum=0'));
-        $lineas = OrdenCompraLinea::with('articulo')->select([DB::raw('@rownum  := @rownum  + 1 AS rownum'),'orden_compra_linea.*'])
-                                                    ->where('orden_compra_id', '=', $ordenCompraId);
-        return Datatables::of($lineas)
+        $detalle = OrdenCompraLinea::with('articulo')->select([DB::raw('@rownum  := @rownum  + 1 AS rownum'),'orden_compra_linea.*'])
+                                                    ->where('orden_compra_id', '=', $parentId);
+        return Datatables::of($detalle)
                 ->addColumn('action', function ($linea) {
                         $nombre = htmlspecialchars($linea->articulo->nombre);
                         return
@@ -127,7 +50,7 @@ class OrdenCompraController extends VoyagerBaseController
                 ->make(true);
     }
 
-    public function createOrdenCompraLinea(Request $request, $idOrden)
+    public function createLinea(Request $request, $parentId)
     {
         if ($request->isMethod('get')) {
             $slug = $this->getSlug($request);
@@ -154,7 +77,7 @@ class OrdenCompraController extends VoyagerBaseController
             // Check if BREAD is Translatable
             $isModelTranslatable = is_bread_translatable($dataTypeContent);
 
-            $view = 'voyager::orden-compra.orden-compra-linea-form';
+            $view = 'detalle-linea-form';
 
             return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
         } else { // POST
@@ -168,20 +91,20 @@ class OrdenCompraController extends VoyagerBaseController
                     'fail' => true,
                     'errors' => $validator->errors()
                 ]);
-            $ordenCompraLinea = new OrdenCompraLinea();
-            $ordenCompraLinea->orden_compra_id = $idOrden;
-            $ordenCompraLinea->articulo_id = $request->articulo_id;
-            $ordenCompraLinea->precio = $request->precio;
-            $ordenCompraLinea->cantidad = $request->cantidad;
-            $ordenCompraLinea->save();
+            $linea = new OrdenCompraLinea();
+            $linea->orden_compra_id = $parentId;
+            $linea->articulo_id = $request->articulo_id;
+            $linea->precio = $request->precio;
+            $linea->cantidad = $request->cantidad;
+            $linea->save();
             return response()->json([
                 'fail' => false,
-                'table_refresh' => 'orden-compra-lineas-table'
+                'table_refresh' => 'detalle-table'
             ]);
         }
     }
 
-    public function editOrdenCompraLinea(Request $request, $id)
+    private function editLinea(Request $request, $id)
     {
         $slug = $this->getSlug($request);
 
@@ -207,15 +130,15 @@ class OrdenCompraController extends VoyagerBaseController
         // Check if BREAD is Translatable
         $isModelTranslatable = is_bread_translatable($dataTypeContent);
 
-        $view = 'voyager::orden-compra.orden-compra-linea-form';
+        $view = 'detalle-linea-form';
 
         return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
     }
 
-    public function ordenCompraLineaUpdate(Request $request, $id)
+    public function updateLinea(Request $request, $id)
     {
         if ($request->isMethod('get'))
-            return $this->editOrdenCompraLinea($request, $id);
+            return $this->editLinea($request, $id);
         else {
             $rules = [
                 'cantidad' => 'required',
@@ -227,26 +150,25 @@ class OrdenCompraController extends VoyagerBaseController
                     'fail' => true,
                     'errors' => $validator->errors()
                 ]);
-            $ordenCompraLinea = OrdenCompraLinea::find($id);
-            $ordenCompraLinea->articulo_id = $request->articulo_id;
-            $ordenCompraLinea->precio = $request->precio;
-            $ordenCompraLinea->cantidad = $request->cantidad;
-            $ordenCompraLinea->save();
+            $linea = OrdenCompraLinea::find($id);
+            $linea->articulo_id = $request->articulo_id;
+            $linea->precio = $request->precio;
+            $linea->cantidad = $request->cantidad;
+            $linea->save();
             return response()->json([
                 'fail' => false,
-                'table_refresh' => 'orden-compra-lineas-table'
+                'table_refresh' => 'detalle-table'
             ]);
         }
     }
 
-    public function ordenCompraLineaDelete($id)
+    public function deleteLinea($id)
     {
-        $ordenCompraLinea = OrdenCompraLinea::with('ordenCompra')->find($id);
-        $ordenCompra = $ordenCompraLinea->ordenCompra;
-        $ordenCompraLinea->delete();
+        $linea = OrdenCompraLinea::find($id);
+        $linea->delete();
         return response()->json([
             'fail' => false,
-            'table_refresh' => 'orden-compra-lineas-table'
+            'table_refresh' => 'detalle-table'
         ]);
     }
 }

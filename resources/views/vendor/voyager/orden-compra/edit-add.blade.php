@@ -137,11 +137,11 @@
                             </div>
                         </div>
                         <div class="panel-body">
-                            <table id="orden-compra-lineas-table" class="table table-bordered compact stripe" style="width:100%">
+                            <table id="detalle-table" class="table table-bordered compact stripe" style="width:100%">
                                 <thead>
                                     <tr>
                                         <th style='vertical-align: middle; width: 50px;'>#</th>
-                                        <th style='vertical-align: middle;'>Articulo</th>
+                                        <th style='vertical-align: middle;'>Artículo</th>
                                         <th style='vertical-align: middle;'>Cantidad</th>
                                         <th style='vertical-align: middle;'>Precio</th>
                                         <th style='vertical-align: middle; width: 150px;'>
@@ -157,19 +157,19 @@
 
                             <div class="loading">
                                 <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i><br/>
-                                <span>Loading</span>
+                                <span>Cargando</span>
                             </div>
 
                             <script>
                                 $(function() {
-                                    $('#orden-compra-lineas-table').DataTable({
+                                    $('#detalle-table').DataTable({
                                         language: {
                                             url: '/i18n/datatables/spanish.json'
                                         },
                                         paging: false,
                                         processing: true,
                                         serverSide: true,
-                                        ajax: '{!! url('orden-compra-lineas?orden_compra_id=') !!}{{ $dataTypeContent->getKey() }}',
+                                        ajax: '{!! url('orden-compra-detalle?parent_id=') !!}{{ $dataTypeContent->getKey() }}',
                                         columns: [
                                             { data: 'rownum',            name: 'rownum', orderable: false, searchable: false },
                                             { data: 'articulo.nombre',   name: 'articulo.nombre' },
