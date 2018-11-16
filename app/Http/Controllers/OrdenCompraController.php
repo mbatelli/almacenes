@@ -41,8 +41,9 @@ class OrdenCompraController extends EntidadConDetalleController
 
     protected function getValidationRules() {
         return [
-            'cantidad' => 'required',
-            //'email' => 'required|email',
+            'articulo_id' => 'required',
+            'cantidad' => 'required|integer|gt:0',
+            'precio' => 'required|numeric|gte:0',
         ];
     }
 

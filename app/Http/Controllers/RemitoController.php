@@ -136,7 +136,6 @@ class RemitoController extends EntidadConDetalleController
 
     protected function getValidationRules() {
         return [
-            'articulo' => 'required',
             'articulo_id' => 'required',
             'cantidad' => 'required|integer|gt:0',
         ];
