@@ -26,6 +26,10 @@ class EntidadConDetalleController extends VoyagerBaseController
 
     }
 
+    protected function getAttributeNames() {
+        
+    }
+
     public function createLinea(Request $request, $parentId)
     {
         if ($request->isMethod('get')) {
@@ -59,6 +63,7 @@ class EntidadConDetalleController extends VoyagerBaseController
         } else { // POST
             $rules = $this->getValidationRules();
             $validator = Validator::make($request->all(), $rules);
+            $validator->setAttributeNames($this->getAttributeNames());
             if ($validator->fails()) {
                 return response()->json([
                     'fail' => true,

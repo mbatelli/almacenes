@@ -141,6 +141,13 @@ class RemitoController extends EntidadConDetalleController
         ];
     }
 
+    protected function getAttributeNames() {
+        return [
+            'articulo_id' => 'Artículo',
+            'cantidad' => 'Cantidad',
+        ];
+    }
+
     protected function createEntidad(Request $request, $parentId) {
         $linea = new RemitoLinea();
         $linea->remito_id = $parentId;

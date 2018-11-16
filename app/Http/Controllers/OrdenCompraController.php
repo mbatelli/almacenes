@@ -47,6 +47,14 @@ class OrdenCompraController extends EntidadConDetalleController
         ];
     }
 
+    protected function getAttributeNames() {
+        return [
+            'articulo_id' => 'Artículo',
+            'cantidad' => 'Cantidad',
+            'precio' => 'Precio',
+        ];
+    }
+
     protected function createEntidad(Request $request, $parentId) {
         $linea = new OrdenCompraLinea();
         $linea->orden_compra_id = $parentId;

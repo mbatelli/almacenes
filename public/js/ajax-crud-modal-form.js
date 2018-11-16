@@ -29,8 +29,8 @@ $(document).on('submit', '#modalForm form#frmTbl', function (event) {
             $('.help-block').remove();
             if (data.fail) {
                 for (control in data.errors) {
-                    $('input[name=' + control + ']').parent().addClass('has-error');
-                    $('input[name=' + control + ']').parent().append('<span class="help-block" style="color:#f96868">' + data.errors[control] + '</span>');
+                    $('[name=' + control + ']').parent().addClass('has-error');
+                    $('[name=' + control + ']').parent().append('<span class="help-block" style="color:#f96868">' + data.errors[control] + '</span>');
                 }
             } else {
                 $('#modalForm').modal('hide');
