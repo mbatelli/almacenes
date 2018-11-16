@@ -94,6 +94,10 @@
                         $dataTypeRows = $dataType->{(!is_null($dataTypeContent->getKey()) ? 'editRows' : 'addRows' )};
                     @endphp
 
+                    <div class="panel-footer">
+                        <button type="button" onclick="window.location='{{ URL::route($dataType->slug.'.index') }}'" class="btn btn-primary save">{{ __('voyager::generic.close') }}</button>
+                    </div>
+                    
                     <div class="panel panel-primary panel-bordered">
                         <div class="panel-heading">
                             <h3 class="panel-title panel-icon">Datos</h3>
@@ -249,6 +253,7 @@
                         <button type="submit" class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>
                     </div>
 
+                    @if(!is_null($dataTypeContent->getKey()))
                     <div class="panel panel-primary panel-bordered" style="margin-top: 20px;">
                         <div class="panel-heading">
                             <h3 class="panel-title panel-icon">Detalle</h3>
@@ -319,6 +324,7 @@
 
                         </div>
                     </div>
+                    @endif
                 </form>
             </div>
         </div>

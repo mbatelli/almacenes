@@ -6,11 +6,9 @@ use Illuminate\Http\Request;
 use TCG\Voyager\Events\BreadDataAdded;
 use TCG\Voyager\Events\BreadDataDeleted;
 use TCG\Voyager\Events\BreadDataUpdated;
-use TCG\Voyager\Events\BreadImagesDeleted;
 use TCG\Voyager\Database\Schema\SchemaManager;
 use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController as BaseVoyagerBaseController;
-use TCG\Voyager\Facades\Voyager as VoyagerFacade;
 use App\Almacenes\Actions\DeleteAction;
 use PHPJasper\PHPJasper;
 
@@ -36,7 +34,7 @@ class VoyagerBaseController extends BaseVoyagerBaseController
     }
 
     public function specifyActions() {
-        VoyagerFacade::replaceAction(TCG\Voyager\Actions\DeleteAction::class, DeleteAction::class);
+        Voyager::replaceAction(TCG\Voyager\Actions\DeleteAction::class, DeleteAction::class);
     }
 
     public function print(Request $request, $id) {
@@ -163,6 +161,10 @@ class VoyagerBaseController extends BaseVoyagerBaseController
         ));
     }
 
+    protected function isCloseEditOnSave() {
+        return false;
+    }
+
     // POST BR(E)AD
     public function update(Request $request, $id)
     {
@@ -190,12 +192,21 @@ class VoyagerBaseController extends BaseVoyagerBaseController
 
             event(new BreadDataUpdated($dataType, $data));
 
-            return redirect()
-                ->route("{$dataType->slug}.index")
-                ->with([
-                    'message'    => __('voyager::generic.successfully_updated')." {$dataType->display_name_singular}",
-                    'alert-type' => 'success',
-                ]);
+            if($this->isCloseEditOnSave()) {
+                return redirect()
+                    ->route("{$dataType->slug}.index")
+                    ->with([
+                        'message'    => __('voyager::generic.successfully_updated')." {$dataType->display_name_singular}",
+                        'alert-type' => 'success',
+                    ]);
+            } else {
+                return redirect()
+                    ->route("{$dataType->slug}.edit", $id)
+                    ->with([
+                        'message'    => __('voyager::generic.successfully_updated')." {$dataType->display_name_singular}",
+                        'alert-type' => 'success',
+                    ]);
+            }
         }
     }
 

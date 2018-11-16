@@ -4,32 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use TCG\Voyager\Database\Schema\SchemaManager;
-use TCG\Voyager\Events\BreadDataAdded;
-use TCG\Voyager\Events\BreadDataDeleted;
-use TCG\Voyager\Events\BreadDataUpdated;
-use TCG\Voyager\Events\BreadImagesDeleted;
 use TCG\Voyager\Facades\Voyager;
-use TCG\Voyager\Http\Controllers\Traits\BreadRelationshipParser;
-use App\Http\Controllers\Voyager\VoyagerBaseController;
 use Yajra\DataTables\DataTables;
 use App\Almacenes\Model\RemitoLinea;
-use App\Almacenes\Model\Remito;
-use App\Almacenes\Model\Deposito;
-use App\Almacenes\Model\Ciudad;
-use App\Almacenes\Model\Articulo;
 use App\Almacenes\Actions\PrintAction;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\LabelAlignment;
 use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Response\QrCodeResponse;
 
-class RemitoController extends VoyagerBaseController
+class RemitoController extends EntidadConDetalleController
 {
     public function specifyActions() {
         parent::specifyActions();
-        VoyagerFacade::addAction(PrintAction::class);
+        Voyager::addAction(PrintAction::class);
     }
 
     public function print(Request $request, $id) {
@@ -147,123 +134,29 @@ class RemitoController extends VoyagerBaseController
                 ->make(true);
     }
 
-    public function createLinea(Request $request, $parentId)
-    {
-        if ($request->isMethod('get')) {
-            $slug = $this->getSlug($request);
-
-            $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
-
-            $relationships = $this->getRelationships($dataType);
-
-            // Check permission
-            $this->authorize('add', app($dataType->model_name));
-
-            $dataTypeContent = (strlen($dataType->model_name) != 0)
-                                ? new $dataType->model_name()
-                                : false;
-
-            foreach ($dataType->editRows as $key => $row) {
-                $details = json_decode($row->details);
-                $dataType->editRows[$key]['col_width'] = isset($details->width) ? $details->width : 100;
-            }
-
-            // If a column has a relationship associated with it, we do not want to show that field
-            $this->removeRelationshipField($dataType, 'add');
-
-            // Check if BREAD is Translatable
-            $isModelTranslatable = is_bread_translatable($dataTypeContent);
-
-            $view = 'detalle-linea-form';
-
-            return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
-        } else { // POST
-            $rules = [
-                'cantidad' => 'required',
-                //'email' => 'required|email',
-            ];
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails())
-                return response()->json([
-                    'fail' => true,
-                    'errors' => $validator->errors()
-                ]);
-            $linea = new RemitoLinea();
-            $linea->remito_id = $parentId;
-            $linea->articulo_id = $request->articulo_id;
-            $linea->cantidad = $request->cantidad;
-            $linea->save();
-            return response()->json([
-                'fail' => false,
-                'table_refresh' => 'detalle-table'
-            ]);
-        }
+    protected function getValidationRules() {
+        return [
+            'articulo' => 'required',
+            'articulo_id' => 'required',
+            'cantidad' => 'required|integer|gt:0',
+        ];
     }
 
-    private function editLinea(Request $request, $id)
-    {
-        $slug = $this->getSlug($request);
-
-        $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
-
-        $relationships = $this->getRelationships($dataType);
-
-        $dataTypeContent = (strlen($dataType->model_name) != 0)
-                ? app($dataType->model_name)->with($relationships)->findOrFail($id)
-                : DB::table($dataType->name)->where('id', $id)->first(); // If Model doest exist, get data from table name
-
-        foreach ($dataType->editRows as $key => $row) {
-            $details = json_decode($row->details);
-            $dataType->editRows[$key]['col_width'] = isset($details->width) ? $details->width : 100;
-        }
-
-        // If a column has a relationship associated with it, we do not want to show that field
-        $this->removeRelationshipField($dataType, 'edit');
-
-        // Check permission
-        $this->authorize('edit', $dataTypeContent);
-
-        // Check if BREAD is Translatable
-        $isModelTranslatable = is_bread_translatable($dataTypeContent);
-
-        $view = 'detalle-linea-form';
-
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+    protected function createEntidad(Request $request, $parentId) {
+        $linea = new RemitoLinea();
+        $linea->remito_id = $parentId;
+        $linea->articulo_id = $request->articulo_id;
+        $linea->cantidad = $request->cantidad;
+        $linea->save();
     }
 
-    public function updateLinea(Request $request, $id)
-    {
-        if ($request->isMethod('get'))
-            return $this->editLinea($request, $id);
-        else {
-            $rules = [
-                'cantidad' => 'required',
-                //'email' => 'required|email',
-            ];
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails())
-                return response()->json([
-                    'fail' => true,
-                    'errors' => $validator->errors()
-                ]);
-            $linea = RemitoLinea::find($id);
-            $linea->articulo_id = $request->articulo_id;
-            $linea->cantidad = $request->cantidad;
-            $linea->save();
-            return response()->json([
-                'fail' => false,
-                'table_refresh' => 'detalle-table'
-            ]);
-        }
+    protected function saveEntidad(Request $request, $linea) {
+        $linea->articulo_id = $request->articulo_id;
+        $linea->cantidad = $request->cantidad;
+        $linea->save();
     }
 
-    public function deleteLinea($id)
-    {
-        $linea = RemitoLinea::find($id);
-        $linea->delete();
-        return response()->json([
-            'fail' => false,
-            'table_refresh' => 'detalle-table'
-        ]);
+    protected function getLinea($id) {
+        return RemitoLinea::find($id);
     }
 }

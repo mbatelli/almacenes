@@ -50,6 +50,10 @@
                                 $dataTypeRows = $dataType->{(!is_null($dataTypeContent->getKey()) ? 'editRows' : 'addRows' )};
                             @endphp
 
+                            <div class="panel-footer">
+                                <button type="button" onclick="window.location='{{ URL::route($dataType->slug.'.index') }}'" class="btn btn-primary save">{{ __('voyager::generic.close') }}</button>
+                            </div>
+                            
                             @foreach($dataTypeRows as $row)
                                 <!-- GET THE DISPLAY OPTIONS -->
                                 @php
