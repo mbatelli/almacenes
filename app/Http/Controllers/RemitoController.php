@@ -13,6 +13,7 @@ use Endroid\QrCode\LabelAlignment;
 use Endroid\QrCode\QrCode;
 use App\Almacenes\Model\Deposito;
 use Illuminate\Support\Carbon;
+use App\Almacenes\Model\Remito;
 
 class RemitoController extends EntidadConDetalleController
 {
@@ -28,9 +29,11 @@ class RemitoController extends EntidadConDetalleController
     // Logica para generar el nro de remito dependiendo del tipo y deposito
     private function generarNumeroRemito($tipo, $depositoId) {
         $deposito = Deposito::findOrFail($depositoId);
+        $ultimoNroRemito = Remito::where('tipo', $tipo)->where('deposito_id', $depositoId)->max('numero');
+        $numeroRemito = $ultimoNroRemito == null ? 1 : $ultimoNroRemito + 1;
         return [
             'puntoVenta' => $deposito->punto_venta,
-            'numero' => 111111
+            'numero' => $numeroRemito
         ];
     }
 

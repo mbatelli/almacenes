@@ -495,7 +495,8 @@
                     $("div#panel_salida").hide();
                     break;
                 case 'COMPROBANTE_AJUSTE':
-                    alert( this.value );
+                    $("div#panel_entrada").hide();
+                    $("div#panel_salida").hide();
                     break;
             }
         }
