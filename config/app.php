@@ -231,4 +231,8 @@ return [
 
     ],
 
+    'almacenes' => [
+        'punto_venta_por_defecto' => 1,
+        'remito_por_defecto' => 'PROVISORIO_SALIDA',
+    ],
 ];

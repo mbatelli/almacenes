@@ -141,7 +141,7 @@
                         </div>
                     </div>
 
-                    <div class="panel panel-primary panel-bordered">
+                    <div id="panel_entrada" class="panel panel-primary panel-bordered">
                         <div class="panel-heading">
                             <h3 class="panel-title panel-icon">Entrada</h3>
                             <div class="panel-actions">
@@ -174,7 +174,7 @@
                         </div>
                     </div>
 
-                    <div class="panel panel-primary panel-bordered">
+                    <div id="panel_salida" class="panel panel-primary panel-bordered">
                         <div class="panel-heading">
                             <h3 class="panel-title panel-icon">Salida</h3>
                             <div class="panel-actions">
@@ -446,6 +446,58 @@
                 $('#confirm_delete_modal').modal('hide');
             });
             $('[data-toggle="tooltip"]').tooltip();
+
+            // Manejo de solo lectura
+            handleReadonly();
+
+            // Manejo de controles dependiendo del tipo de remito
+            handleVisibility($('select[name=tipo]').val());
+            $('select[name=tipo]').on('change', function() {
+                handleVisibility(this.value);
+                onChangeDepositoTipoRemito();
+            });
+
+            // Manejo del nro remito
+            $('select[name=deposito_id]').on('change', function() {
+                onChangeDepositoTipoRemito();
+            });
         });
+        function onChangeDepositoTipoRemito() {
+            $.ajax({
+                type: 'GET',
+                url: '{{url("remito-numero")}}',
+                data: {
+                    'depositoId': $('select[name=deposito_id]').val(),
+                    'tipoRemito': $('select[name=tipo]').val()
+                },
+                success: function (data) {
+                    $('input[name=punto_venta]').val(data.puntoVenta);
+                    $('input[name=numero]').val(data.numero);
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Error: " + errorThrown);
+                }
+            });            
+        }
+        function handleReadonly() {
+            $('input[name=punto_venta]').prop('readonly', true);
+            $('input[name=numero]').prop('readonly', true);
+        }
+        function handleVisibility(tipoRemito) {
+            switch(tipoRemito) {
+                case 'REMITO_SALIDA':
+                case 'PROVISORIO_SALIDA':
+                    $("div#panel_entrada").hide();
+                    $("div#panel_salida").show();
+                    break;
+                case 'REMITO_ENTRADA':
+                    $("div#panel_entrada").show();
+                    $("div#panel_salida").hide();
+                    break;
+                case 'COMPROBANTE_AJUSTE':
+                    alert( this.value );
+                    break;
+            }
+        }
     </script>
 @stop

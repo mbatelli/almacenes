@@ -11,12 +11,48 @@ use App\Almacenes\Actions\PrintAction;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\LabelAlignment;
 use Endroid\QrCode\QrCode;
+use App\Almacenes\Model\Deposito;
+use Illuminate\Support\Carbon;
 
 class RemitoController extends EntidadConDetalleController
 {
     public function specifyActions() {
         parent::specifyActions();
         Voyager::addAction(PrintAction::class);
+    }
+
+    private function getDepositoPorPuntoVenta($puntoVenta) {
+        return Deposito::where('punto_venta', $puntoVenta)->firstOrFail();
+    }
+
+    // Logica para generar el nro de remito dependiendo del tipo y deposito
+    private function generarNumeroRemito($tipo, $depositoId) {
+        $deposito = Deposito::findOrFail($depositoId);
+        return [
+            'puntoVenta' => $deposito->punto_venta,
+            'numero' => 111111
+        ];
+    }
+
+    // Función que se invoca desde la vista por ajax al cambiar el tipo o deposito
+    public function getNumero(Request $request) {
+        $depositoId = $request->input('depositoId');
+        $tipoRemito = $request->input('tipoRemito');
+        $numero = $this->generarNumeroRemito($tipoRemito, $depositoId);
+        return response()->json([
+            'puntoVenta' => $numero['puntoVenta'],
+            'numero' => $numero['numero']
+        ]);
+    }
+
+    // Función para inicializar la entidad (Remito)
+    protected function initContent($dataTypeContent) {
+        $dataTypeContent->tipo = config('app.almacenes.remito_por_defecto');
+        $dataTypeContent->deposito_id = $this->getDepositoPorPuntoVenta(config('app.almacenes.punto_venta_por_defecto'))->id;
+        $numero = $this->generarNumeroRemito($dataTypeContent->tipo, $dataTypeContent->deposito_id);
+        $dataTypeContent->punto_venta = $numero['puntoVenta'];
+        $dataTypeContent->numero = $numero['numero'];
+        $dataTypeContent->fecha = Carbon::now();
     }
 
     public function print(Request $request, $id) {
