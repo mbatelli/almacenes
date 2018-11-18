@@ -312,6 +312,7 @@ class VoyagerBaseController extends BaseVoyagerBaseController
 
         if (!$request->has('_validate')) {
             $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
+            $id = $data->{$data->getKeyName()};
 
             event(new BreadDataAdded($dataType, $data));
 
@@ -319,12 +320,21 @@ class VoyagerBaseController extends BaseVoyagerBaseController
                 return response()->json(['success' => true, 'data' => $data]);
             }
 
-            return redirect()
-                ->route("{$dataType->slug}.index")
-                ->with([
+            if($this->isCloseEditOnSave()) {
+                return redirect()
+                    ->route("{$dataType->slug}.index")
+                    ->with([
                         'message'    => __('voyager::generic.successfully_added_new')." {$dataType->display_name_singular}",
                         'alert-type' => 'success',
                     ]);
+            } else {
+                return redirect()
+                    ->route("{$dataType->slug}.edit", $id)
+                    ->with([
+                        'message'    => __('voyager::generic.successfully_added_new')." {$dataType->display_name_singular}",
+                        'alert-type' => 'success',
+                    ]);
+            }
         }
     }
 
