@@ -395,10 +395,17 @@ class VoyagerBaseController extends BaseVoyagerBaseController
                 event(new BreadDataDeleted($dataType, $data));
             }
         } catch (\Illuminate\Database\QueryException $e){
+            if ($displayName == 'Orden Compra') {
+                $data = [
+                    'message'    => "{$displayName} no puede ser eliminada, se encuentra asociada a Remito/s",
+                    'alert-type' => 'error',
+                ];
+            } else {
             $data = [
                     'message'    => __('voyager::generic.error_deleting')." {$displayName}",
                     'alert-type' => 'error',
                 ];            
+            }
         }
 
         return redirect()->route("{$dataType->slug}.index")->with($data);
