@@ -10,8 +10,12 @@ use App\Http\Controllers\Voyager\VoyagerBaseController;
 
 class EntidadConDetalleController extends VoyagerBaseController
 {
-    protected function getValidationRules() {
+    protected function getValidationRules(Request $request, $parentId) {
         return [];
+    }
+
+    protected function getParentId(Request $request) {
+        return null;
     }
 
     protected function createEntidad(Request $request, $parentId) {
@@ -61,7 +65,7 @@ class EntidadConDetalleController extends VoyagerBaseController
 
             return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
         } else { // POST
-            $rules = $this->getValidationRules();
+            $rules = $this->getValidationRules($request, $parentId);
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($this->getAttributeNames());
             if ($validator->fails()) {
@@ -115,7 +119,7 @@ class EntidadConDetalleController extends VoyagerBaseController
         if ($request->isMethod('get'))
             return $this->editLinea($request, $id);
         else {
-            $rules = $this->getValidationRules();
+            $rules = $this->getValidationRules($request, $this->getParentId($request));
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
                 return response()->json([

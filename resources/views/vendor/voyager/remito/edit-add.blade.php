@@ -448,20 +448,23 @@
             $('[data-toggle="tooltip"]').tooltip();
 
             // Manejo de solo lectura
-            handleReadonly();
-
-            // Manejo de controles dependiendo del tipo de remito
+            handleReadonly($('select[name=tipo]').val());
+            // Manejo de visibilidad
             handleVisibility($('select[name=tipo]').val());
             $('select[name=tipo]').on('change', function() {
                 handleVisibility(this.value);
-                onChangeDepositoTipoRemito();
+                handleReadonly(this.value);
+                //onChangeDepositoTipoRemito();
             });
 
+/*
             // Manejo del nro remito
             $('select[name=deposito_id]').on('change', function() {
                 onChangeDepositoTipoRemito();
             });
+            */
         });
+        /*
         function onChangeDepositoTipoRemito() {
             $.ajax({
                 type: 'GET',
@@ -478,10 +481,20 @@
                     alert("Error: " + errorThrown);
                 }
             });            
-        }
-        function handleReadonly() {
-            $('input[name=punto_venta]').prop('readonly', true);
-            $('input[name=numero]').prop('readonly', true);
+        }*/
+        function handleReadonly(tipoRemito) {
+            switch(tipoRemito) {
+                case 'REMITO_SALIDA':
+                case 'PROVISORIO_SALIDA':
+                case 'COMPROBANTE_AJUSTE':
+                    $('input[name=punto_venta]').prop('readonly', true);
+                    $('input[name=numero]').prop('readonly', true);
+                    break;
+                case 'REMITO_ENTRADA':
+                    $('input[name=punto_venta]').prop('readonly', false);
+                    $('input[name=numero]').prop('readonly', false);
+                    break;
+            }
         }
         function handleVisibility(tipoRemito) {
             switch(tipoRemito) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Yajra\DataTables\DataTables;
 use App\Almacenes\Model\OrdenCompraLinea;
 
@@ -39,9 +40,16 @@ class OrdenCompraController extends EntidadConDetalleController
                 ->make(true);
     }
 
-    protected function getValidationRules() {
+    protected function getValidationRules(Request $request, $parentId) {
+        $ordenCompra_id = $parentId;
+        $articulo_id = $request->articulo_id;
         return [
-            'articulo_id' => 'required',
+            'articulo_id' => [
+                'required',
+                Rule::unique('orden_compra_linea')->where(function ($query) use($ordenCompra_id, $articulo_id) {
+                    return $query->where('orden_compra_id', $ordenCompra_id)->where('articulo_id', $articulo_id);
+                }),
+            ],
             'cantidad' => 'required|integer|gt:0',
             'precio' => 'required|numeric|gte:0',
         ];
@@ -53,6 +61,10 @@ class OrdenCompraController extends EntidadConDetalleController
             'cantidad' => 'Cantidad',
             'precio' => 'Precio',
         ];
+    }
+
+    protected function getParentId(Request $request) {
+        return $request->orden_compra_id;
     }
 
     protected function createEntidad(Request $request, $parentId) {

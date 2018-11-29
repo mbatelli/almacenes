@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use TCG\Voyager\Facades\Voyager;
 use Yajra\DataTables\DataTables;
 use App\Almacenes\Model\RemitoLinea;
@@ -36,7 +37,7 @@ class RemitoController extends EntidadConDetalleController
             'numero' => $numeroRemito
         ];
     }
-
+/*
     // Función que se invoca desde la vista por ajax al cambiar el tipo o deposito
     public function getNumero(Request $request) {
         $depositoId = $request->input('depositoId');
@@ -47,15 +48,23 @@ class RemitoController extends EntidadConDetalleController
             'numero' => $numero['numero']
         ]);
     }
-
+*/
     // Función para inicializar la entidad (Remito)
     protected function initContent($dataTypeContent) {
         $dataTypeContent->tipo = config('app.almacenes.remito_por_defecto');
         $dataTypeContent->deposito_id = $this->getDepositoPorPuntoVenta(config('app.almacenes.punto_venta_por_defecto'))->id;
-        $numero = $this->generarNumeroRemito($dataTypeContent->tipo, $dataTypeContent->deposito_id);
-        $dataTypeContent->punto_venta = $numero['puntoVenta'];
-        $dataTypeContent->numero = $numero['numero'];
         $dataTypeContent->fecha = Carbon::now();
+    }
+
+    // Especializada de voyager
+    public function preSaveData($data)
+    {
+        // Si no es REMITO_ENTRADA y no se generó el nro --> hay que generar el nro al grabar
+        if($data->tipo != 'REMITO_ENTRADA' && $data->punto_venta == null && $data->numero == null) {
+            $numero = $this->generarNumeroRemito($data->tipo, $data->deposito_id);
+            $data->punto_venta = $numero['puntoVenta'];
+            $data->numero = $numero['numero'];
+        }
     }
 
     public function print(Request $request, $id) {
@@ -173,9 +182,16 @@ class RemitoController extends EntidadConDetalleController
                 ->make(true);
     }
 
-    protected function getValidationRules() {
+    protected function getValidationRules(Request $request, $parentId) {
+        $remito_id = $parentId;
+        $articulo_id = $request->articulo_id;
         return [
-            'articulo_id' => 'required',
+            'articulo_id' => [
+                'required',
+                Rule::unique('remito_linea')->where(function ($query) use($remito_id, $articulo_id) {
+                    return $query->where('remito_id', $remito_id)->where('articulo_id', $articulo_id);
+                }),
+            ],
             'cantidad' => 'required|integer|gt:0',
         ];
     }
@@ -185,6 +201,10 @@ class RemitoController extends EntidadConDetalleController
             'articulo_id' => 'Artículo',
             'cantidad' => 'Cantidad',
         ];
+    }
+
+    protected function getParentId(Request $request) {
+        return $request->remito_id;
     }
 
     protected function createEntidad(Request $request, $parentId) {
