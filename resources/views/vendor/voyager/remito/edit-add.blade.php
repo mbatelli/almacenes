@@ -183,19 +183,27 @@
                         </div>
                         <div class="panel-body">
                             <div class="row clearfix">
-                                <div class="col-md-2 form-group">
+                                <div class="col-md-6 form-group">
                                     @php
                                         $field = 'proceso_electoral_id';
                                     @endphp
                                     @include('formfields')
                                 </div>
+                                <div class="col-md-6 form-group">
+                                    @php
+                                        $field = 'destinatario_id';
+                                    @endphp
+                                    @include('formfields')
+                                </div>
+                            </div>
+                            <div class="row clearfix">
                                 <div class="col-md-3 form-group">
                                     @php
                                         $field = 'transportador';
                                     @endphp
                                     @include('formfields')
                                 </div>
-                                <div class="col-md-1 form-group">
+                                <div class="col-md-2 form-group">
                                     @php
                                         $field = 'patente';
                                     @endphp
@@ -207,7 +215,7 @@
                                     @endphp
                                     @include('formfields')
                                 </div>
-                                <div class="col-md-1 form-group">
+                                <div class="col-md-2 form-group">
                                     @php
                                         $field = 'dni';
                                     @endphp

@@ -31,4 +31,11 @@ class PrintAction extends AbstractAction
     {
         return route($this->dataType->slug.'.print', $this->data->{$this->data->getKeyName()});
     }
+
+    public function shouldActionDisplayOnDataType()
+    {
+        if(!method_exists ($this->data, 'showPrintAction' ) || method_exists ($this->data, 'showPrintAction' ) && $this->data->showPrintAction())
+            return parent::shouldActionDisplayOnDataType();
+        return  false;
+    }    
 }

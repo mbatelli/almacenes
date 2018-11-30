@@ -53,4 +53,8 @@ class Remito extends Model
     {
         return $this->hasMany('App\Almacenes\Model\RemitoLinea');
     }
+
+    public function showPrintAction() {
+        return 'REMITO_ENTRADA' != $this->tipo;
+    }
 }
