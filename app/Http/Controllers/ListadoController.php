@@ -127,4 +127,48 @@ class ListadoController extends Controller
         $isServerSide = false;
         return view('listado', compact('queryDef', 'isServerSide'));
     }
+
+    public function listadoHistorial(Request $request) {
+        $fechaDeHoy = new \DateTime();
+        $columns = array(new ColumnDef('remito', 'Remito'), 
+                        new ColumnDef('fecha', 'Fecha'), 
+                        new ColumnDef('ordenCompra', 'Orden de Compra'),
+                        new ColumnDef('descripcion', 'Descripcion'), 
+                        new ColumnDef('ingreso', 'Ingreso'), new ColumnDef('egreso', 'Egreso'),
+                        new ColumnDef('saldo', 'Saldo'));
+        DB::statement(DB::raw('set @total:=0'));
+        $collection = DB::table('remito_linea')
+                        ->join('remito', 'remito.id' , '=', 'remito_linea.remito_id')
+                        ->leftJoin('orden_compra', 'orden_compra.id' , '=', 'remito.orden_compra_id')
+                        ->leftJoin('destinatario', 'destinatario.id' , '=', 'remito.destinatario_id')
+                        ->select(DB::raw('CONCAT(LPAD(remito.punto_venta, 4, "0"),"-",LPAD(remito.numero, 8, "0")) as remito'),
+                                DB::raw('DATE_FORMAT(remito.fecha, "%d/%m/%Y") as fecha'), 
+                                'orden_compra.nro_orden_compra as ordenCompra', 
+                                'destinatario.nombre as descripcion', 
+                                DB::raw('IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,"") as ingreso'),
+                                DB::raw('IF(remito.tipo="REMITO_SALIDA",remito_linea.cantidad,"") as egreso'),
+                                DB::raw('@total:=@total+IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad) as saldo'))
+                        ->where('remito.tipo','<>','PROVISORIO_SALIDA')
+                        ->get();
+        $data = [];
+        foreach ($collection as $item) {
+            $rowData = new RowData();
+
+            $rowData->values = array(
+                'remito' => $item->remito,
+                'fecha' => $item->fecha,
+                'ordenCompra' => $item->ordenCompra,
+                'descripcion' => $item->descripcion,
+                'ingreso' => $item->ingreso,
+                'egreso' => $item->egreso,
+                'saldo' => $item->saldo
+            );
+
+            array_push($data, $rowData);
+        }
+
+        $queryDef = new QueryDef('voyager-download', 'Historial De Movimientos', $columns, $data);
+        $isServerSide = false;
+        return view('listado', compact('queryDef', 'isServerSide'));
+    }
 }

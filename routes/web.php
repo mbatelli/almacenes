@@ -33,6 +33,7 @@ Route::delete('remito-linea/delete/{id}', 'RemitoController@deleteLinea');
 Route::get('/consulta-existencia', 'ListadoController@consultaExistencia');
 Route::get('/puntos-stock-criticos', 'ListadoController@puntosStockCriticos');
 Route::get('/listado-valorizacion', 'ListadoController@listadoValorizacion');
+Route::get('/listado-historial', 'ListadoController@listadoHistorial');
 
 $namespacePrefix = '\\'.config('voyager.controllers.namespace').'\\';
 try {
