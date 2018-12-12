@@ -39,8 +39,8 @@ class ListadoController extends Controller
         }
 
         $queryDef = new QueryDef('voyager-download', 'Consulta de Existencias', $columns, $data);
-        $isServerSide = false;
-        return view('listado', compact('queryDef', 'isServerSide'));
+        $isWithFilter = false;
+        return view('listado', compact('queryDef', 'isWithFilter'));
     }
 
     public function puntosStockCriticos(Request $request) {
@@ -73,8 +73,8 @@ class ListadoController extends Controller
         }
 
         $queryDef = new QueryDef('voyager-download', 'Puntos de Stock Criticos', $columns, $data);
-        $isServerSide = false;
-        return view('listado', compact('queryDef', 'isServerSide'));
+        $isWithFilter = false;
+        return view('listado', compact('queryDef', 'isWithFilter'));
     }
 
     public function listadoValorizacion(Request $request) {
@@ -124,12 +124,13 @@ class ListadoController extends Controller
         }
 
         $queryDef = new QueryDef('voyager-download', 'Listado de Valorizacion', $columns, $data);
-        $isServerSide = false;
-        return view('listado', compact('queryDef', 'isServerSide'));
+        $isWithFilter = false;
+        return view('listado', compact('queryDef', 'isWithFilter'));
     }
 
     public function listadoHistorial(Request $request) {
         $fechaDeHoy = new \DateTime();
+        $selectedArticulo = $request->input('articulo');
         $columns = array(new ColumnDef('remito', 'Remito'), 
                         new ColumnDef('fecha', 'Fecha'), 
                         new ColumnDef('ordenCompra', 'Orden de Compra'),
@@ -168,7 +169,8 @@ class ListadoController extends Controller
         }
 
         $queryDef = new QueryDef('voyager-download', 'Historial De Movimientos', $columns, $data);
-        $isServerSide = false;
-        return view('listado', compact('queryDef', 'isServerSide'));
+        $isWithFilter = true;
+        $filter = 'listadoHistorial-filter';
+        return view('listado', compact('queryDef', 'isWithFilter', 'filter', 'selectedArticulo'));
     }
 }
