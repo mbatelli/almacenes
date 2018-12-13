@@ -137,9 +137,10 @@ class ListadoController extends Controller
                         new ColumnDef('descripcion', 'Descripcion'), 
                         new ColumnDef('ingreso', 'Ingreso'), new ColumnDef('egreso', 'Egreso'),
                         new ColumnDef('saldo', 'Saldo'));
-        DB::statement(DB::raw('set @total:=0'));
+        DB::statement(DB::raw('set @saldoHistorialMovs:=0'));
         $collection = DB::table('remito_linea')
                         ->join('remito', 'remito.id' , '=', 'remito_linea.remito_id')
+                        ->join('articulo', 'articulo.id' , '=', 'remito_linea.articulo_id')
                         ->leftJoin('orden_compra', 'orden_compra.id' , '=', 'remito.orden_compra_id')
                         ->leftJoin('destinatario', 'destinatario.id' , '=', 'remito.destinatario_id')
                         ->select(DB::raw('CONCAT(LPAD(remito.punto_venta, 4, "0"),"-",LPAD(remito.numero, 8, "0")) as remito'),
@@ -148,8 +149,9 @@ class ListadoController extends Controller
                                 'destinatario.nombre as descripcion', 
                                 DB::raw('IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,"") as ingreso'),
                                 DB::raw('IF(remito.tipo="REMITO_SALIDA",remito_linea.cantidad,"") as egreso'),
-                                DB::raw('@total:=@total+IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad) as saldo'))
+                                DB::raw('@saldoHistorialMovs:=@saldoHistorialMovs+IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad) as saldo'))
                         ->where('remito.tipo','<>','PROVISORIO_SALIDA')
+                        ->where('articulo.id','=',$selectedArticulo)
                         ->get();
         $data = [];
         foreach ($collection as $item) {
