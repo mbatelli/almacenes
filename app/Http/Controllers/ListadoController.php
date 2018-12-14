@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Almacenes\Model\Articulo;
+use App\Almacenes\Model\Destinatario;
+use App\Almacenes\Model\Proveedor;
 use App\Almacenes\ColumnDef;
 use App\Almacenes\QueryDef;
 use App\Almacenes\RowData;
@@ -129,8 +131,11 @@ class ListadoController extends Controller
     }
 
     public function listadoHistorial(Request $request) {
-        $fechaDeHoy = new \DateTime();
+        $fechaDesde = $request->input('fechaDesde');
+        $fechaHasta = $request->input('fechaHasta');
         $selectedArticulo = $request->input('articulo');
+        $selectedDestinatario = $request->input('destinatario');
+        $selectedProveedor = $request->input('proveedor');
         $columns = array(new ColumnDef('remito', 'Remito'), 
                         new ColumnDef('fecha', 'Fecha'), 
                         new ColumnDef('ordenCompra', 'Orden de Compra'),
@@ -143,15 +148,24 @@ class ListadoController extends Controller
                         ->join('articulo', 'articulo.id' , '=', 'remito_linea.articulo_id')
                         ->leftJoin('orden_compra', 'orden_compra.id' , '=', 'remito.orden_compra_id')
                         ->leftJoin('destinatario', 'destinatario.id' , '=', 'remito.destinatario_id')
+                        ->leftJoin('proveedor', 'proveedor.id' , '=', 'remito.proveedor_id')
                         ->select(DB::raw('CONCAT(LPAD(remito.punto_venta, 4, "0"),"-",LPAD(remito.numero, 8, "0")) as remito'),
                                 DB::raw('DATE_FORMAT(remito.fecha, "%d/%m/%Y") as fecha'), 
                                 'orden_compra.nro_orden_compra as ordenCompra', 
-                                'destinatario.nombre as descripcion', 
+                                DB::raw('IF(remito.tipo="REMITO_ENTRADA",proveedor.nombre,destinatario.nombre) as descripcion'),
                                 DB::raw('IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,"") as ingreso'),
                                 DB::raw('IF(remito.tipo="REMITO_SALIDA",remito_linea.cantidad,"") as egreso'),
                                 DB::raw('@saldoHistorialMovs:=@saldoHistorialMovs+IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad) as saldo'))
                         ->where('remito.tipo','<>','PROVISORIO_SALIDA')
                         ->where('articulo.id','=',$selectedArticulo)
+                        ->when($fechaDesde, function($query) use ($fechaDesde){
+                            return $query->where('remito.fecha','>=',$fechaDesde);})
+                        ->when($fechaHasta, function($query) use ($fechaHasta){
+                            return $query->where('remito.fecha','<=',$fechaHasta);})
+                        ->when($selectedDestinatario, function($query) use ($selectedDestinatario){
+                            return $query->where('destinatario.id','=',$selectedDestinatario);})
+                        ->when($selectedProveedor, function($query) use ($selectedProveedor){
+                            return $query->where('proveedor.id','=',$selectedProveedor);})
                         ->get();
         $data = [];
         foreach ($collection as $item) {
@@ -173,6 +187,6 @@ class ListadoController extends Controller
         $queryDef = new QueryDef('voyager-download', 'Historial De Movimientos', $columns, $data);
         $isWithFilter = true;
         $filter = 'listadoHistorial-filter';
-        return view('listado', compact('queryDef', 'isWithFilter', 'filter', 'selectedArticulo'));
+        return view('listado', compact('queryDef', 'isWithFilter', 'filter', 'fechaDesde', 'fechaHasta', 'selectedArticulo', 'selectedDestinatario','selectedProveedor'));
     }
 }
