@@ -42,7 +42,8 @@ class ListadoController extends Controller
 
         $queryDef = new QueryDef('voyager-download', 'Consulta de Existencias', $columns, $data);
         $isWithFilter = false;
-        return view('listado', compact('queryDef', 'isWithFilter'));
+        $filterInfo = '';
+        return view('listado', compact('queryDef', 'isWithFilter', 'filterInfo'));
     }
 
     public function puntosStockCriticos(Request $request) {
@@ -76,7 +77,8 @@ class ListadoController extends Controller
 
         $queryDef = new QueryDef('voyager-download', 'Puntos de Stock Criticos', $columns, $data);
         $isWithFilter = false;
-        return view('listado', compact('queryDef', 'isWithFilter'));
+        $filterInfo = '';
+        return view('listado', compact('queryDef', 'isWithFilter', 'filterInfo'));
     }
 
     public function listadoValorizacion(Request $request) {
@@ -127,7 +129,8 @@ class ListadoController extends Controller
 
         $queryDef = new QueryDef('voyager-download', 'Listado de Valorizacion', $columns, $data);
         $isWithFilter = false;
-        return view('listado', compact('queryDef', 'isWithFilter'));
+        $filterInfo = '';
+        return view('listado', compact('queryDef', 'isWithFilter', 'filterInfo'));
     }
 
     public function listadoHistorial(Request $request) {
@@ -187,6 +190,10 @@ class ListadoController extends Controller
         $queryDef = new QueryDef('voyager-download', 'Historial De Movimientos', $columns, $data);
         $isWithFilter = true;
         $filter = 'listadoHistorial-filter';
-        return view('listado', compact('queryDef', 'isWithFilter', 'filter', 'fechaDesde', 'fechaHasta', 'selectedArticulo', 'selectedDestinatario','selectedProveedor'));
+        $filterInfo = sprintf('Artículo: %s -- Destinatario: %s\nProveedor: %s', 
+                $selectedArticulo == null ? 'Todos' : Articulo::find($selectedArticulo)->nombre, 
+                $selectedDestinatario == null ? 'Todos' : Destinatario::find($selectedDestinatario)->nombre,
+                $selectedProveedor == null ? 'Todos' : Proveedor::find($selectedProveedor)->nombre);
+        return view('listado', compact('queryDef', 'isWithFilter', 'filter', 'filterInfo', 'fechaDesde', 'fechaHasta', 'selectedArticulo', 'selectedDestinatario','selectedProveedor'));
     }
 }

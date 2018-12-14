@@ -55,6 +55,47 @@
     <script src="{{ asset('js/datatables.min.js') }}"></script>
     <script>
         $(document).ready(function () {
+            var elem = document.createElement('textarea');
+            elem.innerHTML = '{{ $filterInfo }}';
+            var filterInfo = elem.value;
+            $('#dataTable').DataTable({
+                        language: {
+                            url: '/i18n/datatables/spanish.json'
+                        },
+                        paging: false,
+                        processing: true,
+                        dom: 'Bfrtip',
+                        buttons: [
+                            {
+                                text: 'PDF',
+                                extend: 'pdfHtml5',
+                                customize: function (doc) {
+                                    doc['header']=(function(page, pages) {
+                                        return {
+                                            columns: [
+                                                filterInfo
+                                            ],
+                                            margin: [10, 0]
+                                        }
+                                    });
+                                    doc['footer']=(function(page, pages) {
+                                        return {
+                                            columns: [
+                                                {
+                                                    // This is the right column
+                                                    alignment: 'right',
+                                                    text: ['Página ', { text: page.toString() },  ' de ', { text: pages.toString() }]
+                                                }
+                                            ],
+                                            margin: [10, 0]
+                                        }
+                                    });
+                                },
+                            },
+                            'excel'
+                        ],
+                    });            
+            /*
             var table = $('#dataTable').DataTable({!! json_encode(
                 array_merge([
                     "order" => [],
@@ -64,6 +105,7 @@
                 ],
                 config('voyager.dashboard.data_tables', []))
             , true) !!});
+            */
         });
     </script>
 @stop
