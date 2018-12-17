@@ -15,6 +15,7 @@ use Endroid\QrCode\QrCode;
 use App\Almacenes\Model\Deposito;
 use Illuminate\Support\Carbon;
 use App\Almacenes\Model\Remito;
+use App\Almacenes\Model\Presentacion;
 
 class RemitoController extends EntidadConDetalleController
 {
@@ -37,18 +38,7 @@ class RemitoController extends EntidadConDetalleController
             'numero' => $numeroRemito
         ];
     }
-/*
-    // Función que se invoca desde la vista por ajax al cambiar el tipo o deposito
-    public function getNumero(Request $request) {
-        $depositoId = $request->input('depositoId');
-        $tipoRemito = $request->input('tipoRemito');
-        $numero = $this->generarNumeroRemito($tipoRemito, $depositoId);
-        return response()->json([
-            'puntoVenta' => $numero['puntoVenta'],
-            'numero' => $numero['numero']
-        ]);
-    }
-*/
+
     // Función para inicializar la entidad (Remito)
     protected function initContent($dataTypeContent) {
         $dataTypeContent->tipo = config('app.almacenes.remito_por_defecto');
@@ -152,11 +142,10 @@ class RemitoController extends EntidadConDetalleController
         return $qrFilePath;
     }
 
-    public function detalle(Request $request)
-    {
+    public function detalle(Request $request) {
         $parentId = $request->input('parent_id');
         DB::statement(DB::raw('set @rownum=0'));
-        $detalle = RemitoLinea::with('articulo')->select([DB::raw('@rownum  := @rownum  + 1 AS rownum'),'remito_linea.*'])
+        $detalle = RemitoLinea::with('articulo', 'presentacion')->select([DB::raw('@rownum  := @rownum  + 1 AS rownum'),'remito_linea.*'])
                                                     ->where('remito_id', '=', $parentId);
         return Datatables::of($detalle)
                 ->addColumn('action', function ($linea) {
@@ -212,13 +201,76 @@ class RemitoController extends EntidadConDetalleController
         $linea->remito_id = $parentId;
         $linea->articulo_id = $request->articulo_id;
         $linea->cantidad = $request->cantidad;
+        $linea->presentacion_id = $request->presentacion_id;
         $linea->save();
+        $this->updateParentInfo($parentId);
     }
 
     protected function saveEntidad(Request $request, $linea) {
         $linea->articulo_id = $request->articulo_id;
         $linea->cantidad = $request->cantidad;
+        $linea->presentacion_id = $request->presentacion_id;
         $linea->save();
+        $this->updateParentInfo($linea->remito_id);
+    }
+
+    public function deleteLinea($id) {
+        $linea = $this->getLinea($id);
+        $linea->delete();
+        $this->updateParentInfo($linea->remito_id);
+        return response()->json([
+            'fail' => false,
+            'table_refresh' => 'detalle-table'
+        ]);
+    }
+
+    // Función que se invoca desde la vista por ajax al cambiar el artículo
+    public function getPresentaciones(Request $request) {
+        $remitoLineaId = $request->input('remitoLineaId');
+        $articuloId = $request->input('articuloId');
+        $selectValues = [];
+        foreach (Presentacion::where('articulo_id', '=', $articuloId)->whereNull('deleted_at')->orderBy('nombre', 'ASC')->get() as $item) {
+            array_push($selectValues, [
+                'id' => $item->id,
+                'nombre' => $item->nombre
+            ]);
+        }
+        return response()->json([
+            'selectedValue' => $remitoLineaId != null ? $this->getLinea($remitoLineaId)->presentacion_id : null,
+            'selectValues'  => $selectValues
+        ]);        
+    }
+
+    private function updateParentInfo($remitoId) {
+        // Hay que actualizar remito.peso y remito.volumen determinado por la presentación del artículo
+        $peso = 0;
+        $volumen = 0;
+        $bultos = 0;
+        foreach (RemitoLinea::with('presentacion')->where('remito_id', '=', $remitoId)->get() as $item) {
+            if($item->presentacion != null) {
+                if($item->presentacion->peso != null)
+                    $peso = $peso + $item->cantidad * $item->presentacion->peso;
+                if($item->presentacion->volumen != null)
+                    $volumen = $volumen + $item->cantidad * $item->presentacion->volumen;
+            }
+            $bultos++;
+        }
+        $remito = Remito::find($remitoId);
+        $remito->cantidad_bultos = $bultos;
+        $remito->peso = $peso;
+        $remito->volumen = $volumen;
+        $remito->save();
+    }
+
+    // Función que se invoca desde la vista por ajax al darle submit a la popup del detalle para actualizar campos
+    public function getSalidaInfo(Request $request) {
+        $remitoId = $request->input('remitoId');
+        $remito = Remito::find($remitoId);
+        return response()->json([
+            'bultos' => $remito->cantidad_bultos,
+            'peso' => $remito->peso,
+            'volumen' => $remito->volumen
+        ]);        
     }
 
     protected function getLinea($id) {

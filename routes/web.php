@@ -25,7 +25,8 @@ Route::delete('orden-compra-linea/delete/{id}', 'OrdenCompraController@deleteLin
 
 Route::resource('remito', 'RemitoController');
 Route::get('remito-detalle', 'RemitoController@detalle');
-//Route::get('remito-numero', 'RemitoController@getNumero');
+Route::get('remito-detalle-change-articulo', 'RemitoController@getPresentaciones');
+Route::get('remito-update-salida', 'RemitoController@getSalidaInfo');
 Route::match(['get', 'post'], 'remito-linea/create/{id}', 'RemitoController@createLinea');
 Route::match(['get', 'put'], 'remito-linea/update/{id}', 'RemitoController@updateLinea');
 Route::delete('remito-linea/delete/{id}', 'RemitoController@deleteLinea');

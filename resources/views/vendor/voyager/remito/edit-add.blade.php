@@ -107,6 +107,11 @@
                         </div>
                         <div class="panel-body">
                             <div class="row clearfix">
+                                @php
+                                    $field = 'id';
+                                @endphp
+                                @include('formfields')
+
                                 <div class="col-md-2 form-group">
                                     @php
                                         $field = 'tipo';
@@ -276,6 +281,7 @@
                                         <th style='vertical-align: middle; width: 50px;'>#</th>
                                         <th style='vertical-align: middle;'>Artículo</th>
                                         <th style='vertical-align: middle;'>Cantidad</th>
+                                        <th style='vertical-align: middle;'>Presentación</th>
                                         <th style='vertical-align: middle; width: 150px;'>
                                             <a href="#modalForm" data-toggle="modal" title="Nuevo" 
                                                data-href="{{ url('remito-linea/create') }}/{{ $dataTypeContent->getKey() }}"
@@ -303,10 +309,11 @@
                                         serverSide: true,
                                         ajax: '{!! url('remito-detalle?parent_id=') !!}{{ $dataTypeContent->getKey() }}',
                                         columns: [
-                                            { data: 'rownum',            name: 'rownum', orderable: false, searchable: false },
-                                            { data: 'articulo.nombre',   name: 'articulo.nombre' },
-                                            { data: 'cantidad',          name: 'cantidad' },
-                                            { data: 'action',            name: 'action', orderable: false, searchable: false }
+                                            { data: 'rownum',               name: 'rownum', orderable: false, searchable: false },
+                                            { data: 'articulo.nombre',      name: 'articulo.nombre' },
+                                            { data: 'cantidad',             name: 'cantidad' },
+                                            { data: 'presentacion.nombre',  name: 'presentacion.nombre' },
+                                            { data: 'action',               name: 'action', orderable: false, searchable: false }
                                         ],
                                         columnDefs: [
                                             {
@@ -323,6 +330,10 @@
                                             },
                                             {
                                                 targets: 3,
+                                                className: 'dt-head-center dt-body-left'
+                                            },
+                                            {
+                                                targets: 4,
                                                 className: 'dt-head-center dt-body-center'
                                             }
                                         ]                                    
@@ -462,34 +473,65 @@
             $('select[name=tipo]').on('change', function() {
                 handleVisibility(this.value);
                 handleReadonly(this.value);
-                //onChangeDepositoTipoRemito();
             });
-
-/*
-            // Manejo del nro remito
-            $('select[name=deposito_id]').on('change', function() {
-                onChangeDepositoTipoRemito();
-            });
-            */
         });
-        /*
-        function onChangeDepositoTipoRemito() {
+        function onPostLoadPopup() {
+            $('#frmTbl select[name=articulo_id]').on('change', onChangeArticulo);
+            // Ejecuto para que cargue la 1ra vez si es edición
+            onChangeArticulo();
+        }
+        function onPostDeleteDetalle() {
+            onPostSubmitPopup();
+        }
+        function onPostSubmitPopup() {
+            $('.loading').show();
             $.ajax({
                 type: 'GET',
-                url: '{{url("remito-numero")}}',
+                url: '{{url("remito-update-salida")}}',
                 data: {
-                    'depositoId': $('select[name=deposito_id]').val(),
-                    'tipoRemito': $('select[name=tipo]').val()
+                    'remitoId': $('input[name=id]').val()
                 },
                 success: function (data) {
-                    $('input[name=punto_venta]').val(data.puntoVenta);
-                    $('input[name=numero]').val(data.numero);
+                    $('input[name=cantidad_bultos]').val(data.bultos);
+                    $('input[name=peso]').val(data.peso);
+                    $('input[name=volumen]').val(data.volumen);
+                    $('.loading').hide();
                 },
                 error: function (xhr, textStatus, errorThrown) {
                     alert("Error: " + errorThrown);
                 }
             });            
-        }*/
+        }
+        // Cargamos las presentaciones del artículo
+        function onChangeArticulo() {
+            $('.loading').show();
+            $.ajax({
+                type: 'GET',
+                url: '{{url("remito-detalle-change-articulo")}}',
+                data: {
+                    'remitoLineaId': $('#frmTbl input[name=id]').val(),
+                    'articuloId': $('#frmTbl select[name=articulo_id]').val()
+                },
+                success: function (data) {
+                    $('#frmTbl select[name=presentacion_id]').children('option').remove();
+                    $('#frmTbl select[name=presentacion_id]')
+                            .append($("<option></option>")
+                            .attr("value", '')
+                            .text('-- Seleccionar'));
+                    $.each(data.selectValues, function(idx, value) {
+                        $('#frmTbl select[name=presentacion_id]')
+                            .append($("<option></option>")
+                            .attr("value", value.id)
+                            .text(value.nombre));
+                    });
+                    $('#frmTbl select[name=presentacion_id] option[value=' + data.selectedValue + ']').attr('selected','selected');
+                    $('.loading').hide();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Error: " + errorThrown);
+                }
+            });            
+        }
         function handleReadonly(tipoRemito) {
             switch(tipoRemito) {
                 case 'REMITO_SALIDA':

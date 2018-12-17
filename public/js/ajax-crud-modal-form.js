@@ -35,6 +35,8 @@ $(document).on('submit', '#modalForm form#frmTbl', function (event) {
             } else {
                 $('#modalForm').modal('hide');
                 doResponseCommand(data);
+                if (typeof onPostSubmitPopup === "function")
+                    onPostSubmitPopup();
             }
         },
         error: function (xhr, textStatus, errorThrown) {
@@ -53,6 +55,8 @@ function ajaxLoad(filename, content) {
         success: function (data) {
             $("#" + content).html(data);
             $('.loading').hide();
+            if (typeof onPostLoadPopup === "function")
+                onPostLoadPopup();
         },
         error: function (xhr, status, error) {
             alert(xhr.responseText);
@@ -71,7 +75,9 @@ function ajaxDelete(filename, token, content) {
             $("#" + content).html(data);
             $('.loading').hide();
             doResponseCommand(data);
-        },
+            if (typeof onPostDeleteDetalle === "function")
+                onPostDeleteDetalle();
+},
         error: function (xhr, status, error) {
             alert(xhr.responseText);
         }
@@ -82,7 +88,7 @@ $('#modalForm').on('show.bs.modal', function (event) {
     ajaxLoad(button.data('href'), 'modal_content');
 });
 $('#modalForm').on('shown.bs.modal', function () {
-    $('#focus').trigger('focus')
+    $('#focus').trigger('focus');
 });
 
 $('#modalDelete').on('show.bs.modal', function (event) {
