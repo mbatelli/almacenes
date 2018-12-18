@@ -75,7 +75,7 @@
                                             columns: [
                                                 filterInfo
                                             ],
-                                            margin: [10, 0]
+                                            margin: [10,10]
                                         }
                                     });
                                     doc['footer']=(function(page, pages) {

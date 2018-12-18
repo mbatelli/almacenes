@@ -12,7 +12,7 @@
             <label for="articulo">Artículo</label>
             <select id="articulo" name="articulo">
                 <?php $articulos = App\Almacenes\Model\Articulo::whereNull('deleted_at')->orderBy('nombre', 'ASC')->get(); ?>
-                <option value="">Todos</option>
+                <option value="">Seleccionar</option>
                 @foreach($articulos as $articulo)
                     <option value="{{ $articulo->id }}"@if($selectedArticulo == $articulo->id){{ 'selected="selected"' }}@endif>{{ $articulo->nombre }}</option>
                 @endforeach

@@ -88,6 +88,7 @@ class RemitoController extends EntidadConDetalleController
         // Armamos arreglo de datos con info que se usara en el reporte
         $data = [
             'remito' => [
+                'tipo' => $remito->tipo,
                 'numero' => str_pad($remito->depositoId->punto_venta, 3, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 3, '0', STR_PAD_LEFT),
                 'fecha' => \DateTime::createFromFormat('Y-m-d', $remito->fecha)->format('d/m/Y'),
                 'depositoDireccion' => $remito->depositoId->direccion." ".$remito->depositoId->ciudadId->nombre,

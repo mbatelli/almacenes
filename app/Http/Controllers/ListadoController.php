@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Almacenes\Model\Articulo;
+use App\Almacenes\Model\Deposito;
 use App\Almacenes\Model\Destinatario;
 use App\Almacenes\Model\Proveedor;
 use App\Almacenes\ColumnDef;
@@ -14,17 +15,23 @@ use App\Almacenes\RowData;
 class ListadoController extends Controller
 {
     public function consultaExistencia(Request $request) {
+        $selectedDeposito = $request->input('deposito');
+        $selectedArticulo = $request->input('articulo');
         $columns = array(new ColumnDef('deposito', 'Deposito'), new ColumnDef('codigo', 'Cod'), 
                         new ColumnDef('articulo', 'Articulo'), new ColumnDef('stock', 'Stock'));
-
+        
         $collection = DB::table('articulo')
-                        ->join('remito_linea', 'articulo.id' , '=', 'remito_linea.articulo_id')
+                        ->leftJoin('remito_linea', 'articulo.id' , '=', 'remito_linea.articulo_id')
                         ->join('remito', 'remito.id' , '=', 'remito_linea.remito_id')
-                        ->join('deposito', 'deposito.id' , '=', 'remito.deposito_id')
+                        ->leftJoin('deposito', 'deposito.id' , '=', 'remito.deposito_id')
                         ->select('deposito.nombre as deposito', 'articulo.codigo as codigo', 
-                                'articulo.nombre as articulo', DB::raw('sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad)) as stock'))
-                        ->where('remito.tipo','<>','PROVISORIO_SALIDA')
+                                'articulo.nombre as articulo', 
+                                DB::raw('sum(CASE WHEN (remito.tipo IS NULL OR remito.tipo="PROVISORIO_SALIDA") THEN 0 ELSE IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad) END) as stock'))
+                        ->where('deposito.id','=',$selectedDeposito)
+                        ->when($selectedArticulo, function($query) use ($selectedArticulo){
+                            return $query->where('articulo.id','=',$selectedArticulo);})
                         ->groupBy('deposito.id','articulo.id')
+                        ->orderBy('articulo.nombre')
                         ->get();
         $data = [];
         foreach ($collection as $item) {
@@ -41,9 +48,12 @@ class ListadoController extends Controller
         }
 
         $queryDef = new QueryDef('voyager-download', 'Consulta de Existencias', $columns, $data);
-        $isWithFilter = false;
-        $filterInfo = '';
-        return view('listado', compact('queryDef', 'isWithFilter', 'filterInfo'));
+        $filter = 'consultaExistencia-filter';
+        $isWithFilter = true;
+        $filterInfo = sprintf('Artículo: %s\nDeposito: %s', 
+                $selectedArticulo == null ? 'Todos' : Articulo::find($selectedArticulo)->nombre, 
+                $selectedDeposito == null ? 'No Seleccionado' : Deposito::find($selectedDeposito)->nombre);
+        return view('listado', compact('queryDef', 'isWithFilter', 'filter', 'filterInfo', 'selectedDeposito', 'selectedArticulo'));
     }
 
     public function puntosStockCriticos(Request $request) {
@@ -190,10 +200,10 @@ class ListadoController extends Controller
         $queryDef = new QueryDef('voyager-download', 'Historial De Movimientos', $columns, $data);
         $isWithFilter = true;
         $filter = 'listadoHistorial-filter';
-        $filterInfo = sprintf('Artículo: %s -- Destinatario: %s\nProveedor: %s', 
-                $selectedArticulo == null ? 'Todos' : Articulo::find($selectedArticulo)->nombre, 
-                $selectedDestinatario == null ? 'Todos' : Destinatario::find($selectedDestinatario)->nombre,
-                $selectedProveedor == null ? 'Todos' : Proveedor::find($selectedProveedor)->nombre);
+        $filterInfo = sprintf('Artículo: %s%s%s', 
+                $selectedArticulo == null ? 'No Seleccionado' : Articulo::find($selectedArticulo)->nombre, 
+                $selectedDestinatario == null ? 'Todos' : '\nDestinatario: '.Destinatario::find($selectedDestinatario)->nombre,
+                $selectedProveedor == null ? 'Todos' : '\nProveedor: '.Proveedor::find($selectedProveedor)->nombre);
         return view('listado', compact('queryDef', 'isWithFilter', 'filter', 'filterInfo', 'fechaDesde', 'fechaHasta', 'selectedArticulo', 'selectedDestinatario','selectedProveedor'));
     }
 }
