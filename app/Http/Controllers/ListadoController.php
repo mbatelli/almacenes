@@ -50,9 +50,9 @@ class ListadoController extends Controller
         $queryDef = new QueryDef('voyager-download', 'Consulta de Existencias', $columns, $data);
         $filter = 'consultaExistencia-filter';
         $isWithFilter = true;
-        $filterInfo = sprintf('Artículo: %s\nDeposito: %s', 
-                $selectedArticulo == null ? 'Todos' : Articulo::find($selectedArticulo)->nombre, 
-                $selectedDeposito == null ? 'No Seleccionado' : Deposito::find($selectedDeposito)->nombre);
+        $filterInfo = sprintf('Deposito: %s\nArtículo: %s', 
+                $selectedDeposito == null ? 'No Seleccionado' : Deposito::find($selectedDeposito)->nombre,
+                $selectedArticulo == null ? 'Todos' : Articulo::find($selectedArticulo)->nombre);
         return view('listado', compact('queryDef', 'isWithFilter', 'filter', 'filterInfo', 'selectedDeposito', 'selectedArticulo'));
     }
 
@@ -146,6 +146,7 @@ class ListadoController extends Controller
     public function listadoHistorial(Request $request) {
         $fechaDesde = $request->input('fechaDesde');
         $fechaHasta = $request->input('fechaHasta');
+        $selectedDeposito = $request->input('deposito');
         $selectedArticulo = $request->input('articulo');
         $selectedDestinatario = $request->input('destinatario');
         $selectedProveedor = $request->input('proveedor');
@@ -155,9 +156,48 @@ class ListadoController extends Controller
                         new ColumnDef('descripcion', 'Descripcion'), 
                         new ColumnDef('ingreso', 'Ingreso'), new ColumnDef('egreso', 'Egreso'),
                         new ColumnDef('saldo', 'Saldo'));
-        DB::statement(DB::raw('set @saldoHistorialMovs:=0'));
+        $data = [];
+        $stockInicial = 0;
+
+        $filaStockInicial = DB::table('remito_linea')
+                        ->join('remito', 'remito.id' , '=', 'remito_linea.remito_id')
+                        ->join('deposito', 'deposito.id' , '=', 'remito.deposito_id')
+                        ->join('articulo', 'articulo.id' , '=', 'remito_linea.articulo_id')
+                        ->leftJoin('orden_compra', 'orden_compra.id' , '=', 'remito.orden_compra_id')
+                        ->leftJoin('destinatario', 'destinatario.id' , '=', 'remito.destinatario_id')
+                        ->leftJoin('proveedor', 'proveedor.id' , '=', 'remito.proveedor_id')
+                        ->select(DB::raw('sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad)) as saldo'))
+                        ->where('remito.tipo','<>','PROVISORIO_SALIDA')
+                        ->where('deposito.id','=',$selectedDeposito)
+                        ->where('articulo.id','=',$selectedArticulo)
+                        ->when($fechaDesde, function($query) use ($fechaDesde){
+                            return $query->where('remito.fecha','<',$fechaDesde);})
+                        ->when($selectedDestinatario, function($query) use ($selectedDestinatario){
+                            return $query->where('destinatario.id','=',$selectedDestinatario);})
+                        ->when($selectedProveedor, function($query) use ($selectedProveedor){
+                            return $query->where('proveedor.id','=',$selectedProveedor);})
+                        ->groupBy('deposito.id','articulo.id')
+                        ->get();
+        foreach ($filaStockInicial as $itemStock) {
+            $rowData = new RowData();
+
+            $rowData->values = array(
+                'remito' => "",
+                'fecha' => "",
+                'ordenCompra' => "",
+                'descripcion' => "STOCK AL ".((new \DateTime($fechaDesde))->format('d/m/Y')),
+                'ingreso' => "",
+                'egreso' => "",
+                'saldo' => $itemStock->saldo
+            );
+            $stockInicial = $itemStock->saldo;
+            array_push($data, $rowData);
+        }
+
+        DB::statement(DB::raw('set @saldoHistorialMovs:='.$stockInicial));
         $collection = DB::table('remito_linea')
                         ->join('remito', 'remito.id' , '=', 'remito_linea.remito_id')
+                        ->join('deposito', 'deposito.id' , '=', 'remito.deposito_id')
                         ->join('articulo', 'articulo.id' , '=', 'remito_linea.articulo_id')
                         ->leftJoin('orden_compra', 'orden_compra.id' , '=', 'remito.orden_compra_id')
                         ->leftJoin('destinatario', 'destinatario.id' , '=', 'remito.destinatario_id')
@@ -170,6 +210,7 @@ class ListadoController extends Controller
                                 DB::raw('IF(remito.tipo="REMITO_SALIDA",remito_linea.cantidad,"") as egreso'),
                                 DB::raw('@saldoHistorialMovs:=@saldoHistorialMovs+IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad) as saldo'))
                         ->where('remito.tipo','<>','PROVISORIO_SALIDA')
+                        ->where('deposito.id','=',$selectedDeposito)
                         ->where('articulo.id','=',$selectedArticulo)
                         ->when($fechaDesde, function($query) use ($fechaDesde){
                             return $query->where('remito.fecha','>=',$fechaDesde);})
@@ -180,7 +221,6 @@ class ListadoController extends Controller
                         ->when($selectedProveedor, function($query) use ($selectedProveedor){
                             return $query->where('proveedor.id','=',$selectedProveedor);})
                         ->get();
-        $data = [];
         foreach ($collection as $item) {
             $rowData = new RowData();
 
@@ -200,10 +240,11 @@ class ListadoController extends Controller
         $queryDef = new QueryDef('voyager-download', 'Historial De Movimientos', $columns, $data);
         $isWithFilter = true;
         $filter = 'listadoHistorial-filter';
-        $filterInfo = sprintf('Artículo: %s%s%s', 
+        $filterInfo = sprintf('Deposito: %s\nArtículo: %s%s%s', 
+                $selectedDeposito == null ? 'No Seleccionado' : Deposito::find($selectedDeposito)->nombre,
                 $selectedArticulo == null ? 'No Seleccionado' : Articulo::find($selectedArticulo)->nombre, 
-                $selectedDestinatario == null ? 'Todos' : '\nDestinatario: '.Destinatario::find($selectedDestinatario)->nombre,
-                $selectedProveedor == null ? 'Todos' : '\nProveedor: '.Proveedor::find($selectedProveedor)->nombre);
-        return view('listado', compact('queryDef', 'isWithFilter', 'filter', 'filterInfo', 'fechaDesde', 'fechaHasta', 'selectedArticulo', 'selectedDestinatario','selectedProveedor'));
+                $selectedDestinatario == null ? '' : '\nDestinatario: '.Destinatario::find($selectedDestinatario)->nombre,
+                $selectedProveedor == null ? '' : '\nProveedor: '.Proveedor::find($selectedProveedor)->nombre);
+        return view('listado', compact('queryDef', 'isWithFilter', 'filter', 'filterInfo', 'fechaDesde', 'fechaHasta', 'selectedDeposito', 'selectedArticulo', 'selectedDestinatario','selectedProveedor'));
     }
 }
