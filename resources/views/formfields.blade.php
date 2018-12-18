@@ -6,7 +6,9 @@
     $display_options = isset($options->display) ? $options->display : NULL;
 @endphp
 {{ $row->slugify }}
-<label for="name">{{ $row->display_name }}</label>
+@if($row->type != 'hidden')
+    <label for="name">{{ $row->display_name }}</label>
+@endif
 @include('voyager::multilingual.input-hidden-bread-edit-add')
 @if($row->type == 'relationship')
     @include('voyager::formfields.relationship')

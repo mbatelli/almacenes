@@ -287,46 +287,10 @@
                 }
             });
 
-            @if ($isModelTranslatable)
-                $('.side-body').multilingual({"editing": true});
-            @endif
-
             $('.side-body input[data-slug-origin]').each(function(i, el) {
                 $(el).slugify();
             });
 
-            $('.form-group').on('click', '.remove-multi-image', function (e) {
-                e.preventDefault();
-                $image = $(this).siblings('img');
-
-                params = {
-                    slug:   '{{ $dataType->slug }}',
-                    image:  $image.data('image'),
-                    id:     $image.data('id'),
-                    field:  $image.parent().data('field-name'),
-                    _token: '{{ csrf_token() }}'
-                }
-
-                $('.confirm_delete_name').text($image.data('image'));
-                $('#confirm_delete_modal').modal('show');
-            });
-
-            $('#confirm_delete').on('click', function(){
-                $.post('{{ route('voyager.media.remove') }}', params, function (response) {
-                    if ( response
-                        && response.data
-                        && response.data.status
-                        && response.data.status == 200 ) {
-
-                        toastr.success(response.data.message);
-                        $image.parent().fadeOut(300, function() { $(this).remove(); })
-                    } else {
-                        toastr.error("Error removing image.");
-                    }
-                });
-
-                $('#confirm_delete_modal').modal('hide');
-            });
             $('[data-toggle="tooltip"]').tooltip();
         });
     </script>

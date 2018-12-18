@@ -21,5 +21,12 @@ class RemitoLinea extends Model
     {
         return $this->belongsTo('App\Almacenes\Model\Articulo');
     }
-
+    public function presentacionId()
+    {
+        return $this->belongsTo('App\Almacenes\Model\Presentacion');
+    }
+    public function presentacion()
+    {
+        return $this->belongsTo('App\Almacenes\Model\Presentacion');
+    }
 }
