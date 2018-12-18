@@ -77,7 +77,7 @@ function ajaxDelete(filename, token, content) {
             doResponseCommand(data);
             if (typeof onPostDeleteDetalle === "function")
                 onPostDeleteDetalle();
-},
+        },
         error: function (xhr, status, error) {
             alert(xhr.responseText);
         }

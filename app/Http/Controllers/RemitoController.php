@@ -229,13 +229,17 @@ class RemitoController extends EntidadConDetalleController
         $remitoLineaId = $request->input('remitoLineaId');
         $articuloId = $request->input('articuloId');
         $selectValues = [];
+        $defaultValue = null;
         foreach (Presentacion::where('articulo_id', '=', $articuloId)->whereNull('deleted_at')->orderBy('nombre', 'ASC')->get() as $item) {
+            if($item->por_defecto)
+                $defaultValue = $item->id;
             array_push($selectValues, [
                 'id' => $item->id,
                 'nombre' => $item->nombre
             ]);
         }
         return response()->json([
+            'defaultValue'  => $defaultValue,
             'selectedValue' => $remitoLineaId != null ? $this->getLinea($remitoLineaId)->presentacion_id : null,
             'selectValues'  => $selectValues
         ]);        
