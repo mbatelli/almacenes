@@ -152,6 +152,9 @@ class RemitoController extends EntidadConDetalleController
                 ->addColumn('action', function ($linea) {
                         $nombre = htmlspecialchars($linea->articulo->nombre);
                         return
+                            '<span class="btn btn-sm">'.
+                                '<input type="checkbox" name="row_select" data-id="'.$linea->id.'" title="Selecciona fila" onclick="onRowSelect(this)"/>'.
+                            '</span>'.
                             '<a class="btn btn-sm btn-primary" title="Editar" style="text-decoration: none;" href="#modalForm"'.
                             '  data-toggle="modal" data-href="'.url('remito-linea/update/'.$linea->id).'">'.
                                 '<i class="voyager-edit"></i>'.

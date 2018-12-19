@@ -53,10 +53,10 @@
 @stop
 
 @section('css')
-    <link  href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
 @stop
 @section('head')
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>  
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>  
     <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 @stop
 
@@ -280,14 +280,19 @@
                                     <tr>
                                         <th style='vertical-align: middle; width: 50px;'>#</th>
                                         <th style='vertical-align: middle;'>Artículo</th>
-                                        <th style='vertical-align: middle;'>Cantidad</th>
+                                        <th style='vertical-align: middle; width:50px;'>Cantidad</th>
                                         <th style='vertical-align: middle;'>Presentación</th>
                                         <th style='vertical-align: middle; width: 150px;'>
+                                            <span class='btn btn-sm'>
+                                                <input type="checkbox" name='row_select' data-id='ALL' title='Selecciona todas las filas' onclick='onRowSelect(this)'/>
+                                            </span>
                                             <a href="#modalForm" data-toggle="modal" title="Nuevo" 
                                                data-href="{{ url('remito-linea/create') }}/{{ $dataTypeContent->getKey() }}"
                                                class="btn btn-sm btn-success" style="text-decoration:none;">
                                                     <i class="voyager-plus"></i>
                                             </a>
+                                            <span class='btn btn-sm'>
+                                            </span>
                                         </th>
                                     </tr>
                                 </thead>
@@ -337,7 +342,8 @@
                                                 className: 'dt-head-center dt-body-center'
                                             }
                                         ]                                    
-                                    });
+                                    })
+                                    .on('draw', onLoadedData);
                                 });
                             </script>
 
@@ -420,7 +426,9 @@
             $('.form-group input[type=date]').each(function (idx, elt) {
                 if (elt.type != 'date' || elt.hasAttribute('data-datepicker')) {
                     elt.type = 'text';
+                    try{
                     $(elt).datetimepicker($(elt).data('datepicker'));
+                    } catch(e){}
                 }
             });
 
@@ -437,7 +445,10 @@
             $('select[name=tipo]').on('change', function() {
                 handleVisibility(this.value);
                 handleReadonly(this.value);
+
+                handleVisibilityRowSelect();
             });
+            handleVisibilityRowSelect();
         });
         function onPostLoadPopup() {
             $('#frmTbl select[name=articulo_id]').on('change', onChangeArticulo);
@@ -526,6 +537,42 @@
                     $("div#panel_salida").hide();
                     break;
             }
+        }
+        function handleVisibilityRowSelect() {
+            var rows = $('#detalle-table input[name=row_select]');
+            if($('select[name=tipo]').val() == 'PROVISORIO_SALIDA') {
+                rows.show();
+            } else
+                rows.hide();
+        }
+        function onRowSelect(obj) {
+            var rows = $('#detalle-table input[name=row_select]');
+            if(obj.attributes['data-id'].value == 'ALL') {
+                for(var i = 1; i < rows.length; ++i)
+                    rows[i].checked = rows[0].checked;
+            } else {
+                var allChk = true;
+                for(var i = 1; i < rows.length; ++i) {
+                    if(!rows[i].checked) {
+                        allChk = false;
+                        break;
+                    }
+                }
+                rows[0].checked = allChk;
+            }
+        }
+        function getRowSelectIds() {
+            var rows = $('#detalle-table input[name=row_select]');
+            var ids = [];
+            for(var i = 1; i < rows.length; ++i) {
+                if(rows[i].checked)
+                    ids.push(rows[i].attributes['data-id'].value);
+            }
+            return ids;
+        }
+
+        function onLoadedData(a) {
+            handleVisibilityRowSelect();
         }
     </script>
 @stop
