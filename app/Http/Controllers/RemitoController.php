@@ -277,23 +277,25 @@ class RemitoController extends EntidadConDetalleController
 
     private function updateParentInfo($remitoId) {
         // Hay que actualizar remito.peso y remito.volumen determinado por la presentación del artículo
-        $peso = 0;
-        $volumen = 0;
-        $bultos = 0;
-        foreach (RemitoLinea::with('presentacion')->where('remito_id', '=', $remitoId)->get() as $item) {
-            if($item->presentacion != null) {
-                if($item->presentacion->peso != null)
-                    $peso = $peso + $item->cantidad * $item->presentacion->peso;
-                if($item->presentacion->volumen != null)
-                    $volumen = $volumen + $item->cantidad * $item->presentacion->volumen;
-            }
-            $bultos++;
-        }
         $remito = Remito::find($remitoId);
-        $remito->cantidad_bultos = $bultos;
-        $remito->peso = $peso;
-        $remito->volumen = $volumen;
-        $remito->save();
+        if($remito->tipo === 'REMITO_SALIDA') {
+            $peso = 0;
+            $volumen = 0;
+            $bultos = 0;
+            foreach (RemitoLinea::with('presentacion')->where('remito_id', '=', $remitoId)->get() as $item) {
+                if($item->presentacion != null) {
+                    if($item->presentacion->peso != null)
+                        $peso = $peso + $item->cantidad * $item->presentacion->peso;
+                    if($item->presentacion->volumen != null)
+                        $volumen = $volumen + $item->cantidad * $item->presentacion->volumen;
+                }
+                $bultos++;
+            }
+            $remito->cantidad_bultos = $bultos;
+            $remito->peso = $peso;
+            $remito->volumen = $volumen;
+            $remito->save();
+        }
     }
 
     // Función que se invoca desde la vista por ajax al darle submit a la popup del detalle para actualizar campos

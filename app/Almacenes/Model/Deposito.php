@@ -23,6 +23,6 @@ class Deposito extends Model
 
     protected function listDropDown()
     {
-        return Deposito::orderBy('nombre', 'asc')->get();
+        return Deposito::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
     }
 }

@@ -15,6 +15,6 @@ class TipoDestinatario extends Model
 
     protected function listDropDown()
     {
-        return TipoDestinatario::orderBy('nombre', 'asc')->get();
+        return TipoDestinatario::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
     }
 }

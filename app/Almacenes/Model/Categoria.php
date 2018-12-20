@@ -15,6 +15,6 @@ class Categoria extends Model
 
     protected function listDropDown()
     {
-        return Categoria::orderBy('nombre', 'asc')->get();
+        return Categoria::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
     }
 }
