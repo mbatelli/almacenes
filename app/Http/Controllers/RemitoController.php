@@ -21,7 +21,6 @@ class RemitoController extends EntidadConDetalleController
 {
     public function specifyActions() {
         parent::specifyActions();
-        //Voyager::replaceAction("TCG\Voyager\Actions\ViewAction", PrintAction::class);
         Voyager::addAction(PrintAction::class);
     }
 

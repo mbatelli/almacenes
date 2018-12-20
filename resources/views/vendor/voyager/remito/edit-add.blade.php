@@ -317,7 +317,7 @@
                                             { data: 'rownum',               name: 'rownum', orderable: false, searchable: false },
                                             { data: 'articulo.nombre',      name: 'articulo.nombre' },
                                             { data: 'cantidad',             name: 'cantidad' },
-                                            { data: 'presentacion.nombre',  name: 'presentacion.nombre' },
+                                            { data: 'presentacion.nombre',  name: 'presentacion.nombre', defaultContent: '<i>Sin especificar</i>' },
                                             { data: 'action',               name: 'action', orderable: false, searchable: false }
                                         ],
                                         columnDefs: [
