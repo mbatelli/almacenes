@@ -112,13 +112,13 @@
                                 @endphp
                                 @include('formfields')
 
-                                <div class="col-md-2 form-group">
+                                <div class="col-md-3 form-group">
                                     @php
                                         $field = 'tipo';
                                     @endphp
                                     @include('formfields')
                                 </div>
-                                <div class="col-md-4 form-group">
+                                <div class="col-md-3 form-group">
                                     @php
                                         $field = 'deposito_id';
                                     @endphp
@@ -511,7 +511,8 @@
             switch(tipoRemito) {
                 case 'REMITO_SALIDA':
                 case 'PROVISORIO_SALIDA':
-                case 'COMPROBANTE_AJUSTE':
+                case 'COMPROBANTE_AJUSTE_ENTRADA':
+                case 'COMPROBANTE_AJUSTE_SALIDA':
                     $('input[name=punto_venta]').prop('readonly', true);
                     $('input[name=numero]').prop('readonly', true);
                     break;
@@ -532,7 +533,8 @@
                     $("div#panel_entrada").show();
                     $("div#panel_salida").hide();
                     break;
-                case 'COMPROBANTE_AJUSTE':
+                case 'COMPROBANTE_AJUSTE_ENTRADA':
+                case 'COMPROBANTE_AJUSTE_SALIDA':
                     $("div#panel_entrada").hide();
                     $("div#panel_salida").hide();
                     break;
