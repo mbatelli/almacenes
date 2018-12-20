@@ -30,6 +30,7 @@ Route::get('remito-update-salida', 'RemitoController@getSalidaInfo');
 Route::match(['get', 'post'], 'remito-linea/create/{id}', 'RemitoController@createLinea');
 Route::match(['get', 'put'], 'remito-linea/update/{id}', 'RemitoController@updateLinea');
 Route::delete('remito-linea/delete/{id}', 'RemitoController@deleteLinea');
+Route::match(['get', 'post'], 'remito/definitivo/{remitoId}/{ids}', 'RemitoController@definitivo');
 
 Route::get('/consulta-existencia', 'ListadoController@consultaExistencia');
 Route::get('/puntos-stock-criticos', 'ListadoController@puntosStockCriticos');

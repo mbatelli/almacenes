@@ -277,6 +277,19 @@
                         <div class="panel-body">
                             <table id="detalle-table" class="table table-bordered compact stripe" style="width:100%">
                                 <thead>
+                                    <tr id="row_select_header">
+                                        <th style='vertical-align: middle;text-align:right;' colspan="4">
+                                            Con las filas seleccionadas
+                                        </th>
+                                        <th style='vertical-align: middle; width: 150px;'>
+                                            <a href="#modalDefinitivo" data-toggle="modal" title="Nuevo Remito con las filas seleccionadas" 
+                                                data-href="{{ url('remito/definitivo') }}/{{ $dataTypeContent->getKey() }}"
+                                                class="btn btn-sm btn-success" style="text-decoration:none;">
+                                                        <i class="voyager-plus"></i>&nbsp;
+                                                        <span id="row_select_btn_label">Generar Nuevo Remito</span>
+                                            </a>
+                                        </th>
+                                    </tr>
                                     <tr>
                                         <th style='vertical-align: middle; width: 50px;'>#</th>
                                         <th style='vertical-align: middle;'>Artículo</th>
@@ -409,10 +422,63 @@
         </div>
     </div>
     <!-- End Delete File Modal -->
+
+    
+    <div class="modal fade modal-danger" id="modalDefinitivo">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">&times;</button>
+                    <h4 class="modal-title"><i class="voyager-warning"></i> {{ __('voyager::generic.are_you_sure') }}</h4>
+                </div>
+
+                <div class="modal-body">
+                    <h4>{{ __('voyager::generic.are_you_sure_delete_r') }} <span id="definitivo_titulo" class="confirm_delete_name"></span></h4>
+                    <input type="hidden" id="definitivo_ids"/>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
+                    <button type="button" class="btn btn-danger" id="confirm_delete"
+                            onclick="ajaxDefinitivo('{{url('remito/definitivo')}}/{{ $dataTypeContent->getKey() }}/' + $('#definitivo_ids').val())">>
+                            {{ __('voyager::generic.delete_confirm') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('javascript')
     <script src="{{asset('js/ajax-crud-modal-form.js')}}"></script>
+    <script>
+        function ajaxDefinitivo(filename, content) {
+            content = typeof content !== 'undefined' ? content : 'content';
+            $('.loading').show();
+            $.ajax({
+                type: 'POST',
+                data: {},
+                url: filename,
+                success: function (data) {
+                    $('#modalDefinitivo').modal("hide");
+//                    $("#" + content).html(data);
+                    $('.loading').hide();
+                    doResponseCommand(data);
+                    onPostSubmitPopup();
+                },
+                error: function (xhr, status, error) {
+                    alert(xhr.responseText);
+                }
+            });
+        }
+
+        $('#modalDefinitivo').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            $('#definitivo_titulo').text($('#row_select_btn_label').text());
+            $('#definitivo_ids').val(getRowSelectIds());
+        });
+    </script>
 
     <script>
         var params = {};
@@ -426,9 +492,7 @@
             $('.form-group input[type=date]').each(function (idx, elt) {
                 if (elt.type != 'date' || elt.hasAttribute('data-datepicker')) {
                     elt.type = 'text';
-                    try{
                     $(elt).datetimepicker($(elt).data('datepicker'));
-                    } catch(e){}
                 }
             });
 
@@ -542,11 +606,32 @@
             var rows = $('#detalle-table input[name=row_select]');
             if($('select[name=tipo]').val() == 'PROVISORIO_SALIDA') {
                 rows.show();
-            } else
+                handleVisibilityNewRemito(rows);
+            } else {
                 rows.hide();
+                $('#row_select_header').hide();
+            }
+        }
+        function handleVisibilityNewRemito(rows) {
+            $('#row_select_header').hide();
+            for(var i = 1; i < rows.length; ++i) {
+                if(rows[i].checked) {
+                    $('#row_select_header').show();
+                    break;
+                }
+            }
+            if(rows[0].checked)
+                $('#row_select_btn_label').text('Convertir en Definitivo');
+            else
+                $('#row_select_btn_label').text('Generar Nuevo Remito');
+        }
+
+        function onLoadedData(a) {
+            handleVisibilityRowSelect();
         }
         function onRowSelect(obj) {
             var rows = $('#detalle-table input[name=row_select]');
+            var algunoChequeado = false;
             if(obj.attributes['data-id'].value == 'ALL') {
                 for(var i = 1; i < rows.length; ++i)
                     rows[i].checked = rows[0].checked;
@@ -560,19 +645,18 @@
                 }
                 rows[0].checked = allChk;
             }
+            handleVisibilityNewRemito(rows);
         }
         function getRowSelectIds() {
             var rows = $('#detalle-table input[name=row_select]');
+            if(rows[0].checked)
+                return 'ALL';
             var ids = [];
             for(var i = 1; i < rows.length; ++i) {
                 if(rows[i].checked)
                     ids.push(rows[i].attributes['data-id'].value);
             }
-            return ids;
-        }
-
-        function onLoadedData(a) {
-            handleVisibilityRowSelect();
+            return ids.join(',');
         }
     </script>
 @stop

@@ -228,6 +228,32 @@ class RemitoController extends EntidadConDetalleController
         ]);
     }
 
+    public function definitivo(Request $request, $remitoId, $ids) {
+        $remito = Remito::find($remitoId);
+        if($ids == 'ALL') {
+            // Convierte el remito provisorio en definitivo
+            $remito->tipo = 'REMITO_SALIDA';
+//            $remito->save();
+        } else {
+            // Crea un remito definitivo con las lineas seleccionadas
+            $remito->id = null;
+            // TODO: Datos de Salida
+//            $remito->save();
+            // SAVE
+            foreach(split(',', $ids) as $id) {
+                $linea = $this->getLinea($id);
+                $linea->remito_id = $remito->id;
+//                $linea->save();
+            }
+ //           $this->updateParentInfo($remito->id);
+ //           $this->updateParentInfo($remitoId);
+        }
+        return response()->json([
+            'fail' => false,
+            'table_refresh' => 'detalle-table'
+        ]);
+    }
+
     // Función que se invoca desde la vista por ajax al cambiar el artículo
     public function getPresentaciones(Request $request) {
         $remitoLineaId = $request->input('remitoLineaId');
