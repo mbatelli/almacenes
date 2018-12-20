@@ -42,7 +42,7 @@
                                     @endforeach
                                 </select>
                                 <select id="filter" name="filter">
-                                    <option value="contains" @if($search->filter == "contains"){{ 'selected' }}@endif>contains</option>
+                                    <option value="contains" @if($search->filter == "contains"){{ 'selected' }}@endif>Contiene</option>
                                     <option value="equals" @if($search->filter == "equals"){{ 'selected' }}@endif>=</option>
                                 </select>
                                 <div class="input-group col-md-12">
@@ -55,14 +55,14 @@
                                 </div>
                         @endif
                         @if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(app($dataType->model_name))))
-                                <div class="input-group col-md-1">
+                                <div class="input-group col-md-11">
                                 <select id="filter-softDelete" name="filterSoftDelete">
                                     <option value="todos" @if($search->filterSoftDelete == "todos"){{ 'selected' }}@endif>Todos</option>
                                     <option value="vigentes" @if($search->filterSoftDelete == "vigentes"){{ 'selected' }}@endif>Vigentes</option>
                                     <option value="noVigentes" @if($search->filterSoftDelete == "noVigentes"){{ 'selected' }}@endif>No Vigentes</option>
                                 </select>
                                 </div>
-                                <div class="input-group col-md-11">
+                                <div class="input-group col-md-1">
                                     <span class="input-group-btn">
                                         <button class="btn btn-info btn-lg" type="submit">
                                             <i class="voyager-search"></i>
@@ -205,7 +205,9 @@
                                         @endforeach
                                         <td class="no-sort no-click" id="bread-actions">
                                             @foreach(Voyager::actions() as $action)
-                                                @include('voyager::bread.partials.actions', ['action' => $action])
+                                                @if(isset($action))
+                                                    @include('voyager::bread.partials.actions', ['action' => $action])
+                                                @endif
                                             @endforeach
                                         </td>
                                     </tr>

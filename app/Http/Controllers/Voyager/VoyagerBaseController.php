@@ -34,7 +34,8 @@ class VoyagerBaseController extends BaseVoyagerBaseController
     }
 
     public function specifyActions() {
-        Voyager::replaceAction(TCG\Voyager\Actions\DeleteAction::class, DeleteAction::class);
+        Voyager::replaceAction("TCG\Voyager\Actions\DeleteAction", DeleteAction::class);
+        Voyager::replaceAction("TCG\Voyager\Actions\ViewAction", null);
     }
 
     public function print(Request $request, $id) {
