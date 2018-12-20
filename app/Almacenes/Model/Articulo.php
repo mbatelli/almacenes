@@ -14,7 +14,7 @@ class Articulo extends Model
 
     protected function listDropDown()
     {
-        return Articulo::orderBy('nombre', 'asc')->get();
+        return Articulo::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
     }
 
     /**

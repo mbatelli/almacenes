@@ -15,7 +15,7 @@ class Ciudad extends Model
 
     protected function listDropDown()
     {
-        return Ciudad::orderBy('nombre', 'asc')->get();
+        return Ciudad::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
     }
 
     /**

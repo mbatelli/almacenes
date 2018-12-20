@@ -15,7 +15,7 @@ class Presentacion extends Model
 
     protected function listDropDown()
     {
-        return Presentacion::orderBy('nombre', 'asc')->get();
+        return Presentacion::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
     }
 
     /**

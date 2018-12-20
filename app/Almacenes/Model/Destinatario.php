@@ -13,6 +13,11 @@ class Destinatario extends Model
     protected $table = 'destinatario';
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
+    protected function listDropDown()
+    {
+        return Ciudad::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
+    }
+    
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */

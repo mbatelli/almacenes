@@ -15,6 +15,6 @@ class ProcesoElectoral extends Model
 
     protected function listDropDown()
     {
-        return ProcesoElectoral::orderBy('nombre', 'asc')->get();
+        return ProcesoElectoral::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
     }
 }

@@ -15,6 +15,6 @@ class Provincia extends Model
 
     protected function listDropDown()
     {
-        return Provincia::orderBy('nombre', 'asc')->get();
+        return Provincia::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
     }
 }

@@ -89,7 +89,9 @@ class VoyagerBaseController extends BaseVoyagerBaseController
 
         $getter = $dataType->server_side ? 'paginate' : 'get';
 
-        $search = (object) ['value' => $request->get('s'), 'key' => $request->get('key'), 'filter' => $request->get('filter')];
+        $search = (object) ['value' => $request->get('s'), 'key' => $request->get('key'), 'filter' => $request->get('filter'), 'filterSoftDelete' => $request->get('filterSoftDelete')];
+        if(!isset($search->filterSoftDelete))
+            $search->filterSoftDelete = 'vigentes';
         $searchable = $dataType->server_side ? array_keys(SchemaManager::describeTable(app($dataType->model_name)->getTable())->toArray()) : '';
         $orderBy = $request->get('order_by');
         $sortOrder = $request->get('sort_order', null);
@@ -99,10 +101,16 @@ class VoyagerBaseController extends BaseVoyagerBaseController
             $relationships = $this->getRelationships($dataType);
 
             $model = app($dataType->model_name);
-            if(in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($model)))
-                $query = $model::withTrashed()->select('*')->with($relationships);
-            else
+            if(in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($model))) {
+                if($search->filterSoftDelete === 'todos')
+                    $query = $model::withTrashed()->select('*')->with($relationships);
+                else if($search->filterSoftDelete === 'vigentes')
+                    $query = $model::select('*')->with($relationships);
+                else if($search->filterSoftDelete === 'noVigentes')
+                    $query = $model::withTrashed()->whereNotNull('deleted_at')->select('*')->with($relationships);
+            } else {
                 $query = $model::select('*')->with($relationships);
+            }
 
             // If a column has a relationship associated with it, we do not want to show that field
             $this->removeRelationshipField($dataType, 'browse');

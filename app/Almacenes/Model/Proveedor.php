@@ -19,7 +19,7 @@ class Proveedor extends Model
 
     protected function listDropDown()
     {
-        return Proveedor::orderBy('nombre', 'asc')->get();
+        return Proveedor::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
     }
 
     /**
