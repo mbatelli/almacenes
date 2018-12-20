@@ -26,7 +26,7 @@ class ListadoController extends Controller
                         ->leftJoin('deposito', 'deposito.id' , '=', 'remito.deposito_id')
                         ->select('deposito.nombre as deposito', 'articulo.codigo as codigo', 
                                 'articulo.nombre as articulo', 
-                                DB::raw('sum(CASE WHEN (remito.tipo IS NULL OR remito.tipo="PROVISORIO_SALIDA") THEN 0 ELSE IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad) END) as stock'))
+                                DB::raw('sum(CASE WHEN (remito.tipo IS NULL OR remito.tipo="PROVISORIO_SALIDA") THEN 0 ELSE IF((remito.tipo="REMITO_ENTRADA" OR remito.tipo="COMPROBANTE_AJUSTE_ENTRADA"),remito_linea.cantidad,-remito_linea.cantidad) END) as stock'))
                         ->where('deposito.id','=',$selectedDeposito)
                         ->when($selectedArticulo, function($query) use ($selectedArticulo){
                             return $query->where('articulo.id','=',$selectedArticulo);})
@@ -65,10 +65,10 @@ class ListadoController extends Controller
                         ->join('remito', 'remito.id' , '=', 'remito_linea.remito_id')
                         ->join('deposito', 'deposito.id' , '=', 'remito.deposito_id')
                         ->select('deposito.nombre as deposito', 'articulo.codigo as codigo', 
-                                'articulo.nombre as articulo', 'articulo.stock_critico as critico', DB::raw('sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad)) as stock'))
+                                'articulo.nombre as articulo', 'articulo.stock_critico as critico', DB::raw('sum(IF((remito.tipo="REMITO_ENTRADA" OR remito.tipo="COMPROBANTE_AJUSTE_ENTRADA"),remito_linea.cantidad,-remito_linea.cantidad)) as stock'))
                         ->where('remito.tipo','<>','PROVISORIO_SALIDA')
                         ->groupBy('deposito.id','articulo.id')
-                        ->havingRaw('sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad)) < articulo.stock_critico')
+                        ->havingRaw('sum(IF((remito.tipo="REMITO_ENTRADA" OR remito.tipo="COMPROBANTE_AJUSTE_ENTRADA"),remito_linea.cantidad,-remito_linea.cantidad)) < articulo.stock_critico')
                         ->get();
         $data = [];
         foreach ($collection as $item) {
@@ -100,6 +100,8 @@ class ListadoController extends Controller
                         new ColumnDef('preciosOC', 'Precio'), new ColumnDef('costo', 'Costo'),
                         new ColumnDef('total', 'Total'));
 
+        DB::statement(DB::raw('set @stockValorizacion:=0'));
+        DB::statement(DB::raw('set @costoValorizacion:=0'));
         $collection = DB::table('articulo')
                         ->join('remito_linea', 'articulo.id' , '=', 'remito_linea.articulo_id')
                         ->join('remito', 'remito.id' , '=', 'remito_linea.remito_id')
@@ -109,9 +111,9 @@ class ListadoController extends Controller
                             function($join){$join->on('orden_compra.id' , '=', 'orden_compra_linea.orden_compra_id');
                                  $join->on('articulo.id' , '=', 'orden_compra_linea.articulo_id');})
                         ->select('deposito.nombre as deposito', 'articulo.codigo as codigo', 'articulo.nombre as articulo', 
-                                DB::raw('sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad)) as stock'),
-                                DB::raw('FORMAT(sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,0)*IF(remito.tipo="REMITO_ENTRADA",orden_compra_linea.precio,0)) / sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad)),2,"es_AR") as costo'),
-                                DB::raw('FORMAT(sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,0)*IF(remito.tipo="REMITO_ENTRADA",orden_compra_linea.precio,0)),2,"es_AR") as total'),
+                                DB::raw('@stockValorizacion:=sum(IF((remito.tipo="REMITO_ENTRADA" OR remito.tipo="COMPROBANTE_AJUSTE_ENTRADA"),remito_linea.cantidad,-remito_linea.cantidad)) as stock'),
+                                DB::raw('@costoValorizacion:=FORMAT(sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,0)*IF(remito.tipo="REMITO_ENTRADA",orden_compra_linea.precio,0)) / sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,0)),2,"es_AR") as costo'),
+                                DB::raw('FORMAT((sum(IF((remito.tipo="REMITO_ENTRADA" OR remito.tipo="COMPROBANTE_AJUSTE_ENTRADA"),remito_linea.cantidad,-remito_linea.cantidad)) * sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,0)*IF(remito.tipo="REMITO_ENTRADA",orden_compra_linea.precio,0)) / sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,0))),2,"es_AR") as total'),
                                 DB::raw('GROUP_CONCAT(orden_compra.nro_orden_compra SEPARATOR "|") as nrosOC'),
                                 DB::raw('GROUP_CONCAT(DATE_FORMAT(orden_compra.fecha, "%d/%m/%Y") SEPARATOR "|") as fechasOC'),
                                 DB::raw('GROUP_CONCAT(FORMAT(orden_compra_linea.precio,2,"es_AR") SEPARATOR "|") as preciosOC'))
@@ -150,8 +152,8 @@ class ListadoController extends Controller
         $selectedArticulo = $request->input('articulo');
         $selectedDestinatario = $request->input('destinatario');
         $selectedProveedor = $request->input('proveedor');
-        $columns = array(new ColumnDef('remito', 'Remito'), 
-                        new ColumnDef('fecha', 'Fecha'), 
+        $columns = array(new ColumnDef('fecha', 'Fecha'), 
+                        new ColumnDef('remito', 'Remito'), 
                         new ColumnDef('ordenCompra', 'Orden de Compra'),
                         new ColumnDef('descripcion', 'Descripcion'), 
                         new ColumnDef('ingreso', 'Ingreso'), new ColumnDef('egreso', 'Egreso'),
@@ -159,39 +161,41 @@ class ListadoController extends Controller
         $data = [];
         $stockInicial = 0;
 
-        $filaStockInicial = DB::table('remito_linea')
-                        ->join('remito', 'remito.id' , '=', 'remito_linea.remito_id')
-                        ->join('deposito', 'deposito.id' , '=', 'remito.deposito_id')
-                        ->join('articulo', 'articulo.id' , '=', 'remito_linea.articulo_id')
-                        ->leftJoin('orden_compra', 'orden_compra.id' , '=', 'remito.orden_compra_id')
-                        ->leftJoin('destinatario', 'destinatario.id' , '=', 'remito.destinatario_id')
-                        ->leftJoin('proveedor', 'proveedor.id' , '=', 'remito.proveedor_id')
-                        ->select(DB::raw('sum(IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad)) as saldo'))
-                        ->where('remito.tipo','<>','PROVISORIO_SALIDA')
-                        ->where('deposito.id','=',$selectedDeposito)
-                        ->where('articulo.id','=',$selectedArticulo)
-                        ->when($fechaDesde, function($query) use ($fechaDesde){
-                            return $query->where('remito.fecha','<',$fechaDesde);})
-                        ->when($selectedDestinatario, function($query) use ($selectedDestinatario){
-                            return $query->where('destinatario.id','=',$selectedDestinatario);})
-                        ->when($selectedProveedor, function($query) use ($selectedProveedor){
-                            return $query->where('proveedor.id','=',$selectedProveedor);})
-                        ->groupBy('deposito.id','articulo.id')
-                        ->get();
-        foreach ($filaStockInicial as $itemStock) {
-            $rowData = new RowData();
+        if($fechaDesde) {
+            $filaStockInicial = DB::table('remito_linea')
+                            ->join('remito', 'remito.id' , '=', 'remito_linea.remito_id')
+                            ->join('deposito', 'deposito.id' , '=', 'remito.deposito_id')
+                            ->join('articulo', 'articulo.id' , '=', 'remito_linea.articulo_id')
+                            ->leftJoin('orden_compra', 'orden_compra.id' , '=', 'remito.orden_compra_id')
+                            ->leftJoin('destinatario', 'destinatario.id' , '=', 'remito.destinatario_id')
+                            ->leftJoin('proveedor', 'proveedor.id' , '=', 'remito.proveedor_id')
+                            ->select(DB::raw('sum(IF((remito.tipo="REMITO_ENTRADA" OR remito.tipo="COMPROBANTE_AJUSTE_ENTRADA"),remito_linea.cantidad,-remito_linea.cantidad)) as saldo'))
+                            ->where('remito.tipo','<>','PROVISORIO_SALIDA')
+                            ->where('deposito.id','=',$selectedDeposito)
+                            ->where('articulo.id','=',$selectedArticulo)
+                            ->when($fechaDesde, function($query) use ($fechaDesde){
+                                return $query->where('remito.fecha','<',$fechaDesde);})
+                            ->when($selectedDestinatario, function($query) use ($selectedDestinatario){
+                                return $query->where('destinatario.id','=',$selectedDestinatario);})
+                            ->when($selectedProveedor, function($query) use ($selectedProveedor){
+                                return $query->where('proveedor.id','=',$selectedProveedor);})
+                            ->groupBy('deposito.id','articulo.id')
+                            ->get();
+            foreach ($filaStockInicial as $itemStock) {
+                $rowData = new RowData();
 
-            $rowData->values = array(
-                'remito' => "",
-                'fecha' => "",
-                'ordenCompra' => "",
-                'descripcion' => "STOCK AL ".((new \DateTime($fechaDesde))->format('d/m/Y')),
-                'ingreso' => "",
-                'egreso' => "",
-                'saldo' => $itemStock->saldo
-            );
-            $stockInicial = $itemStock->saldo;
-            array_push($data, $rowData);
+                $rowData->values = array(
+                    'fecha' => "",
+                    'remito' => "",
+                    'ordenCompra' => "",
+                    'descripcion' => "STOCK AL ".((new \DateTime($fechaDesde))->format('d/m/Y')),
+                    'ingreso' => "",
+                    'egreso' => "",
+                    'saldo' => $itemStock->saldo
+                );
+                $stockInicial = $itemStock->saldo;
+                array_push($data, $rowData);
+            }
         }
 
         DB::statement(DB::raw('set @saldoHistorialMovs:='.$stockInicial));
@@ -205,10 +209,10 @@ class ListadoController extends Controller
                         ->select(DB::raw('CONCAT(LPAD(remito.punto_venta, 4, "0"),"-",LPAD(remito.numero, 8, "0")) as remito'),
                                 DB::raw('DATE_FORMAT(remito.fecha, "%d/%m/%Y") as fecha'), 
                                 'orden_compra.nro_orden_compra as ordenCompra', 
-                                DB::raw('IF(remito.tipo="REMITO_ENTRADA",proveedor.nombre,destinatario.nombre) as descripcion'),
-                                DB::raw('IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,"") as ingreso'),
-                                DB::raw('IF(remito.tipo="REMITO_SALIDA",remito_linea.cantidad,"") as egreso'),
-                                DB::raw('@saldoHistorialMovs:=@saldoHistorialMovs+IF(remito.tipo="REMITO_ENTRADA",remito_linea.cantidad,-remito_linea.cantidad) as saldo'))
+                                DB::raw('IF(remito.tipo="REMITO_ENTRADA",proveedor.nombre,IF(remito.tipo="REMITO_SALIDA",destinatario.nombre,remito.tipo)) as descripcion'),
+                                DB::raw('IF((remito.tipo="REMITO_ENTRADA" OR remito.tipo="COMPROBANTE_AJUSTE_ENTRADA"),remito_linea.cantidad,"") as ingreso'),
+                                DB::raw('IF((remito.tipo="REMITO_SALIDA" OR remito.tipo="COMPROBANTE_AJUSTE_SALIDA"),remito_linea.cantidad,"") as egreso'),
+                                DB::raw('@saldoHistorialMovs:=@saldoHistorialMovs+IF((remito.tipo="REMITO_ENTRADA" OR remito.tipo="COMPROBANTE_AJUSTE_ENTRADA"),remito_linea.cantidad,-remito_linea.cantidad) as saldo'))
                         ->where('remito.tipo','<>','PROVISORIO_SALIDA')
                         ->where('deposito.id','=',$selectedDeposito)
                         ->where('articulo.id','=',$selectedArticulo)
@@ -220,13 +224,14 @@ class ListadoController extends Controller
                             return $query->where('destinatario.id','=',$selectedDestinatario);})
                         ->when($selectedProveedor, function($query) use ($selectedProveedor){
                             return $query->where('proveedor.id','=',$selectedProveedor);})
+                        ->orderBy('remito.fecha')
                         ->get();
         foreach ($collection as $item) {
             $rowData = new RowData();
 
             $rowData->values = array(
-                'remito' => $item->remito,
                 'fecha' => $item->fecha,
+                'remito' => $item->remito,
                 'ordenCompra' => $item->ordenCompra,
                 'descripcion' => $item->descripcion,
                 'ingreso' => $item->ingreso,
