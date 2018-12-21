@@ -528,6 +528,7 @@
                     success: function (data) {
                         if(data.modifico) {
                             $('select[name=tipo]').val(data.tipo);
+                            $('select[name=tipo]').select2();
                             $('input[name=numero]').val(data.numero);
                         }
 
