@@ -39,6 +39,10 @@
             font-weight: 700;
             margin-right: 20px;
         }       
+        .bootstrap-datetimepicker-widget {
+            overflow:visible !important ;
+            z-index: 10000 !important;
+        }
     </style>
 @stop
 
@@ -252,7 +256,7 @@
                                     @endphp
                                     @include('formfields')
                                 </div>
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-6 form-group">
                                     @php
                                         $field = 'precintos';
                                     @endphp
@@ -283,7 +287,6 @@
                                         </th>
                                         <th style='vertical-align: middle; width: 150px;'>
                                             <a href="#modalDefinitivo" data-toggle="modal" title="Nuevo Remito con las filas seleccionadas" 
-                                                data-href="{{ url('remito/definitivo') }}/{{ $dataTypeContent->getKey() }}"
                                                 class="btn btn-sm btn-success" style="text-decoration:none;">
                                                         <i class="voyager-plus"></i>&nbsp;
                                                         <span id="row_select_btn_label">Generar Nuevo Remito</span>
@@ -393,8 +396,9 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
                     <button type="button" class="btn btn-danger" id="confirm_delete"
-                            onclick="ajaxDelete('{{url('remito-linea/delete')}}/'+$('#delete_id').val(),$('#delete_token').val())">>
-                            {{ __('voyager::generic.delete_confirm') }}</button>
+                            onclick="ajaxDelete('{{url('remito-linea/delete')}}/'+$('#delete_id').val(),$('#delete_token').val())">
+                            {{ __('voyager::generic.delete_confirm') }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -421,8 +425,6 @@
             </div>
         </div>
     </div>
-    <!-- End Delete File Modal -->
-
     
     <div class="modal fade modal-danger" id="modalDefinitivo">
         <div class="modal-dialog">
@@ -435,15 +437,14 @@
                 </div>
 
                 <div class="modal-body">
-                    <h4>{{ __('voyager::generic.are_you_sure_delete_r') }} <span id="definitivo_titulo" class="confirm_delete_name"></span></h4>
-                    <input type="hidden" id="definitivo_ids"/>
+                    <h4>{{ __('voyager::generic.are_you_sure_action') }} <span id="definitivo_titulo" class="confirm_delete_name"></span></h4>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
-                    <button type="button" class="btn btn-danger" id="confirm_delete"
-                            onclick="ajaxDefinitivo('{{url('remito/definitivo')}}/{{ $dataTypeContent->getKey() }}/' + $('#definitivo_ids').val())">>
-                            {{ __('voyager::generic.delete_confirm') }}</button>
+                    <button type="button" class="btn btn-danger" onclick="ajaxDefinitivo()">
+                            {{ __('voyager::generic.action_confirm') }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -453,17 +454,32 @@
 @section('javascript')
     <script src="{{asset('js/ajax-crud-modal-form.js')}}"></script>
     <script>
-        function ajaxDefinitivo(filename, content) {
-            content = typeof content !== 'undefined' ? content : 'content';
+        @if(is_null($dataTypeContent->getKey()))
+            var _mode = 'CREATE';
+        @else
+            var _mode = 'EDIT';
+        @endif
+
+        var campos = ['transportador', 'patente', 'conductor', 'dni', 'telefono', 'precintos'];
+
+        function ajaxDefinitivo(filename) {
             $('.loading').show();
+            var params = { };
+            for(var i = 0; i < campos.length; ++i)
+                params[campos[i]] = $('input[name=' + campos[i] + ']').val();
             $.ajax({
                 type: 'POST',
-                data: {},
-                url: filename,
+                data: params,
+                url: "{{url('remito/definitivo')}}/{{ $dataTypeContent->getKey() }}/" + getRowSelectIds(),
                 success: function (data) {
+                    if(data.modifico) {
+                        $('select[name=tipo]').val(data.tipo);
+                        $('input[name=numero]').val(data.numero);
+                    }
+
                     $('#modalDefinitivo').modal("hide");
-//                    $("#" + content).html(data);
                     $('.loading').hide();
+
                     doResponseCommand(data);
                     onPostSubmitPopup();
                 },
@@ -476,7 +492,6 @@
         $('#modalDefinitivo').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             $('#definitivo_titulo').text($('#row_select_btn_label').text());
-            $('#definitivo_ids').val(getRowSelectIds());
         });
     </script>
 
@@ -585,6 +600,11 @@
                     $('input[name=numero]').prop('readonly', false);
                     break;
             }
+            if(_mode == 'EDIT') {
+                $('select[name=tipo]').prop('disabled', true);
+                $('select[name=deposito_id]').prop('disabled', true);
+                $('input[name=fecha]').prop('readonly', true);
+            }
         }
         function handleVisibility(tipoRemito) {
             switch(tipoRemito) {
@@ -629,6 +649,7 @@
         }
 
         function onLoadedData(a) {
+            $('#detalle-table input[name=row_select]')[0].checked = false;
             handleVisibilityRowSelect();
         }
         function onRowSelect(obj) {

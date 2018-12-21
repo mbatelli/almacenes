@@ -57,4 +57,12 @@ class Remito extends Model
     public function showPrintAction() {
         return 'REMITO_ENTRADA' != $this->tipo;
     }
+
+    // Lo convierte en un nuevo remito y lo inserta
+    public function insertNew()
+    {
+        $this->id = null;
+        $this->exists = false;
+        $this->save();
+    }
 }

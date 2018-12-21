@@ -30,12 +30,14 @@ class RemitoController extends EntidadConDetalleController
 
     // Logica para generar el nro de remito dependiendo del tipo y deposito
     private function generarNumeroRemito($tipo, $depositoId) {
-        $deposito = Deposito::findOrFail($depositoId);
         $ultimoNroRemito = Remito::where('tipo', $tipo)->where('deposito_id', $depositoId)->max('numero');
-        $numeroRemito = $ultimoNroRemito == null ? 1 : $ultimoNroRemito + 1;
+        return $ultimoNroRemito == null ? 1 : $ultimoNroRemito + 1;
+    }
+    private function generarPvtaNumeroRemito($tipo, $depositoId) {
+        $deposito = Deposito::findOrFail($depositoId);
         return [
             'puntoVenta' => $deposito->punto_venta,
-            'numero' => $numeroRemito
+            'numero' => $this->generarNumeroRemito($tipo, $depositoId)
         ];
     }
 
@@ -51,7 +53,7 @@ class RemitoController extends EntidadConDetalleController
     {
         // Si no es REMITO_ENTRADA y no se generó el nro --> hay que generar el nro al grabar
         if($data->tipo != 'REMITO_ENTRADA' && $data->punto_venta == null && $data->numero == null) {
-            $numero = $this->generarNumeroRemito($data->tipo, $data->deposito_id);
+            $numero = $this->generarPvtaNumeroRemito($data->tipo, $data->deposito_id);
             $data->punto_venta = $numero['puntoVenta'];
             $data->numero = $numero['numero'];
         }
@@ -181,9 +183,9 @@ class RemitoController extends EntidadConDetalleController
         return [
             'articulo_id' => [
                 'required',
-                Rule::unique('remito_linea')->where(function ($query) use($remito_id, $articulo_id) {
-                    return $query->where('remito_id', $remito_id)->where('articulo_id', $articulo_id);
-                }),
+//                Rule::unique('remito_linea')->where(function ($query) use($remito_id, $articulo_id) {
+//                    return $query->where('remito_id', $remito_id)->where('articulo_id', $articulo_id);
+//                }),
             ],
             'cantidad' => 'required|integer|gt:0',
         ];
@@ -228,29 +230,40 @@ class RemitoController extends EntidadConDetalleController
         ]);
     }
 
+    // Genera un remito de salida con algunas o todas las lineas del
+    // remito provisorio actual
     public function definitivo(Request $request, $remitoId, $ids) {
+        // Consulta el remito
         $remito = Remito::find($remitoId);
-        if($ids == 'ALL') {
-            // Convierte el remito provisorio en definitivo
-            $remito->tipo = 'REMITO_SALIDA';
-//            $remito->save();
-        } else {
-            // Crea un remito definitivo con las lineas seleccionadas
-            $remito->id = null;
-            // TODO: Datos de Salida
-//            $remito->save();
-            // SAVE
-            foreach(split(',', $ids) as $id) {
+        // Le setea los campos de tipo y transportista
+        $remito->tipo = 'REMITO_SALIDA';
+        $remito->numero = $this->generarNumeroRemito($remito->tipo, $remito->deposito_id);
+        $remito->transportador = $request->input('transportador');
+        $remito->patente = $request->input('patente');
+        $remito->conductor = $request->input('conductor');
+        $remito->dni = $request->input('dni');
+        $remito->telefono = $request->input('telefono');
+        $remito->precintos = $request->input('precintos');
+        if($ids == 'ALL') // Convierte el remito provisorio en definitivo
+            $remito->save();
+        else { // Crea un remito definitivo con las lineas seleccionadas
+            $remito->insertNew(); // Le borra el id e inserta un registro nuevo
+            // mueve las lineas
+            foreach(explode(',', $ids) as $id) {
                 $linea = $this->getLinea($id);
                 $linea->remito_id = $remito->id;
-//                $linea->save();
+                $linea->save();
             }
- //           $this->updateParentInfo($remito->id);
- //           $this->updateParentInfo($remitoId);
+            $this->updateParentInfo($remito->id);
         }
+        $this->updateParentInfo($remitoId);
         return response()->json([
             'fail' => false,
-            'table_refresh' => 'detalle-table'
+            'table_refresh' => 'detalle-table',
+
+            'modifico' => $ids == 'ALL',
+            'tipo' => $remito->tipo,
+            'numero' => $remito->numero
         ]);
     }
 
@@ -278,18 +291,20 @@ class RemitoController extends EntidadConDetalleController
     private function updateParentInfo($remitoId) {
         // Hay que actualizar remito.peso y remito.volumen determinado por la presentación del artículo
         $remito = Remito::find($remitoId);
-        if($remito->tipo === 'REMITO_SALIDA') {
+        if($remito->tipo === 'REMITO_SALIDA' || $remito->tipo === 'PROVISORIO_SALIDA') {
             $peso = 0;
             $volumen = 0;
             $bultos = 0;
             foreach (RemitoLinea::with('presentacion')->where('remito_id', '=', $remitoId)->get() as $item) {
                 if($item->presentacion != null) {
+                    $b = $item->presentacion->cantidad != null ? ceil($item->cantidad / $item->presentacion->cantidad) : 1;
                     if($item->presentacion->peso != null)
-                        $peso = $peso + $item->cantidad * $item->presentacion->peso;
+                        $peso = $peso + $b * $item->presentacion->peso;
                     if($item->presentacion->volumen != null)
-                        $volumen = $volumen + $item->cantidad * $item->presentacion->volumen;
-                }
-                $bultos++;
+                        $volumen = $volumen + $b * $item->presentacion->volumen;
+                    $bultos = $bultos + $b;
+                } else
+                    $bultos++;
             }
             $remito->cantidad_bultos = $bultos;
             $remito->peso = $peso;
