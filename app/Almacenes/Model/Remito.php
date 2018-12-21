@@ -55,7 +55,7 @@ class Remito extends Model
     }
 
     public function showPrintAction() {
-        return 'REMITO_ENTRADA' != $this->tipo;
+        return 'REMITO_SALIDA' == $this->tipo || 'PROVISORIO_SALIDA' == $this->tipo;
     }
 
     // Lo convierte en un nuevo remito y lo inserta
