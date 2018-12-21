@@ -244,13 +244,13 @@
                                     @endphp
                                     @include('formfields')
                                 </div>
-                                <div class="col-md-1 form-group">
+                                <div class="col-md-2 form-group">
                                     @php
                                         $field = 'peso';
                                     @endphp
                                     @include('formfields')
                                 </div>
-                                <div class="col-md-1 form-group">
+                                <div class="col-md-2 form-group">
                                     @php
                                         $field = 'volumen';
                                     @endphp
@@ -438,6 +438,48 @@
 
                 <div class="modal-body">
                     <h4>{{ __('voyager::generic.are_you_sure_action') }} <span id="definitivo_titulo" class="confirm_delete_name"></span></h4>
+                    <div class="row clearfix">
+                        <div class="col-md-4 form-group">
+                            @php
+                                $field = 'transportador';
+                            @endphp
+                            @include('formfields')
+                        </div>
+                        <div class="col-md-3 form-group">
+                            @php
+                                $field = 'patente';
+                            @endphp
+                            @include('formfields')
+                        </div>
+                    </div>
+                    <div class="row clearfix">
+                        <div class="col-md-4 form-group">
+                            @php
+                                $field = 'conductor';
+                            @endphp
+                            @include('formfields')
+                        </div>
+                        <div class="col-md-3 form-group">
+                            @php
+                                $field = 'dni';
+                            @endphp
+                            @include('formfields')
+                        </div>
+                        <div class="col-md-4 form-group">
+                            @php
+                                $field = 'telefono';
+                            @endphp
+                            @include('formfields')
+                        </div>
+                    </div>
+                    <div class="row clearfix">
+                        <div class="col-md-6 form-group">
+                            @php
+                                $field = 'precintos';
+                            @endphp
+                            @include('formfields')
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -460,38 +502,50 @@
             var _mode = 'EDIT';
         @endif
 
-        var campos = ['transportador', 'patente', 'conductor', 'dni', 'telefono', 'precintos'];
+        var definitivoCampos = {
+            campos: ['transportador', 'patente', 'conductor', 'dni', 'telefono', 'precintos'],
+            get: function () {
+                var d = { };
+                for(var i = 0; i < this.campos.length; ++i)
+                    d[this.campos[i]] = $('#modalDefinitivo input[name=' + this.campos[i] + ']').val();
+                return d;
+            },
+            set: function () {
+                $('#definitivo_titulo').text($('#row_select_btn_label').text());
+                for(var i = 0; i < this.campos.length; ++i)
+                    $('#modalDefinitivo input[name=' + this.campos[i] + ']').val( $('input[name=' + this.campos[i] + ']').val() );
+            }
+        };
 
         function ajaxDefinitivo(filename) {
-            $('.loading').show();
-            var params = { };
-            for(var i = 0; i < campos.length; ++i)
-                params[campos[i]] = $('input[name=' + campos[i] + ']').val();
-            $.ajax({
-                type: 'POST',
-                data: params,
-                url: "{{url('remito/definitivo')}}/{{ $dataTypeContent->getKey() }}/" + getRowSelectIds(),
-                success: function (data) {
-                    if(data.modifico) {
-                        $('select[name=tipo]').val(data.tipo);
-                        $('input[name=numero]').val(data.numero);
+            var ids = getRowSelectIds();
+            if( ids != null ) {
+                $('.loading').show();
+                $.ajax({
+                    type: 'POST',
+                    data: definitivoCampos.get(),
+                    url: "{{url('remito/definitivo')}}/{{ $dataTypeContent->getKey() }}/" + ids,
+                    success: function (data) {
+                        if(data.modifico) {
+                            $('select[name=tipo]').val(data.tipo);
+                            $('input[name=numero]').val(data.numero);
+                        }
+
+                        $('#modalDefinitivo').modal("hide");
+                        $('.loading').hide();
+
+                        doResponseCommand(data);
+                        onPostSubmitPopup();
+                    },
+                    error: function (xhr, status, error) {
+                        alert(xhr.responseText);
                     }
-
-                    $('#modalDefinitivo').modal("hide");
-                    $('.loading').hide();
-
-                    doResponseCommand(data);
-                    onPostSubmitPopup();
-                },
-                error: function (xhr, status, error) {
-                    alert(xhr.responseText);
-                }
-            });
+                });
+            }
         }
 
         $('#modalDefinitivo').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            $('#definitivo_titulo').text($('#row_select_btn_label').text());
+            definitivoCampos.set();
         });
     </script>
 
@@ -533,6 +587,7 @@
             $('#frmTbl select[name=articulo_id]').on('change', onChangeArticulo);
             // Ejecuto para que cargue la 1ra vez si es edición
             onChangeArticulo();
+            $('#frmTbl select[name=presentacion_id]').on('change', onChangePresentacion);
         }
         function onPostDeleteDetalle() {
             onPostSubmitPopup();
@@ -557,8 +612,10 @@
             });            
         }
         // Cargamos las presentaciones del artículo
+        var _presentaciones = [];
         function onChangeArticulo() {
             $('.loading').show();
+            _presentaciones = [];
             $.ajax({
                 type: 'GET',
                 url: '{{url("remito-detalle-change-articulo")}}',
@@ -578,7 +635,13 @@
                             .attr("value", value.id)
                             .text(value.nombre));
                     });
-                    $('#frmTbl select[name=presentacion_id] option[value=' + (data.selectedValue != null ? data.selectedValue : data.defaultValue) + ']').attr('selected','selected');
+                    _presentaciones = data.selectValues;
+                    if(data.selectedValue != null)
+                        $('#frmTbl select[name=presentacion_id]').val(data.selectedValue);
+                    else {
+                        $('#frmTbl select[name=presentacion_id]').val(data.defaultValue);
+                        onChangePresentacion();
+                    }
                     $('.loading').hide();
                 },
                 error: function (xhr, textStatus, errorThrown) {
@@ -586,6 +649,16 @@
                 }
             });            
         }
+        function onChangePresentacion() {
+            var pId = $('#frmTbl select[name=presentacion_id]').val();
+            for(var i = 0; i < _presentaciones.length; ++i){
+                if(_presentaciones[i].id == pId){
+                    $('#frmTbl input[name=cantidad]').val(_presentaciones[i].cantidad);
+                    break;
+                }
+            }
+        }
+
         function handleReadonly(tipoRemito) {
             switch(tipoRemito) {
                 case 'REMITO_SALIDA':
@@ -599,6 +672,11 @@
                     $('input[name=punto_venta]').prop('readonly', false);
                     $('input[name=numero]').prop('readonly', false);
                     break;
+            }
+            if(tipoRemito == 'PROVISORIO_SALIDA') {
+                $('input[name=cantidad_bultos]').prop('readonly', true);
+                $('input[name=peso]').prop('readonly', true);
+                $('input[name=volumen]').prop('readonly', true);
             }
             if(_mode == 'EDIT') {
                 $('select[name=tipo]').prop('disabled', true);
@@ -642,19 +720,23 @@
                     break;
                 }
             }
-            if(rows[0].checked)
-                $('#row_select_btn_label').text('Convertir en Definitivo');
-            else
-                $('#row_select_btn_label').text('Generar Nuevo Remito');
+            if(rows.length > 0) {
+                if(rows[0].checked)
+                    $('#row_select_btn_label').text('Convertir en Definitivo');
+                else
+                    $('#row_select_btn_label').text('Generar Nuevo Remito');
+            }
         }
 
         function onLoadedData(a) {
-            $('#detalle-table input[name=row_select]')[0].checked = false;
-            handleVisibilityRowSelect();
+            var rows = $('#detalle-table input[name=row_select]');
+            if(rows.length > 0) {
+                rows[0].checked = false;
+                handleVisibilityRowSelect();
+            }
         }
         function onRowSelect(obj) {
             var rows = $('#detalle-table input[name=row_select]');
-            var algunoChequeado = false;
             if(obj.attributes['data-id'].value == 'ALL') {
                 for(var i = 1; i < rows.length; ++i)
                     rows[i].checked = rows[0].checked;
@@ -672,14 +754,17 @@
         }
         function getRowSelectIds() {
             var rows = $('#detalle-table input[name=row_select]');
-            if(rows[0].checked)
-                return 'ALL';
-            var ids = [];
-            for(var i = 1; i < rows.length; ++i) {
-                if(rows[i].checked)
-                    ids.push(rows[i].attributes['data-id'].value);
+            if(rows.length > 0){
+                if(rows[0].checked)
+                    return 'ALL';
+                var ids = [];
+                for(var i = 1; i < rows.length; ++i) {
+                    if(rows[i].checked)
+                        ids.push(rows[i].attributes['data-id'].value);
+                }
+                return ids.join(',');
             }
-            return ids.join(',');
+            return null;
         }
     </script>
 @stop

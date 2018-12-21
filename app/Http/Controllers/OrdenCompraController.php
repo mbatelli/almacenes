@@ -24,7 +24,6 @@ class OrdenCompraController extends EntidadConDetalleController
                             '  data-toggle="modal" data-href="'.url('orden-compra-linea/update/'.$linea->id).'">'.
                                 '<i class="voyager-edit"></i>'.
                             '</a>'.
-                            '<input type="hidden" name="_method" value="delete"/>'.
                             '<a class="btn btn-danger btn-sm" title="Eliminar" style="text-decoration: none;"'.
                             '  data-toggle="modal" href="#modalDelete"'.
                             '  data-id="'.$linea->id.'"'.

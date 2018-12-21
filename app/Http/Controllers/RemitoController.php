@@ -161,7 +161,6 @@ class RemitoController extends EntidadConDetalleController
                             '  data-toggle="modal" data-href="'.url('remito-linea/update/'.$linea->id).'">'.
                                 '<i class="voyager-edit"></i>'.
                             '</a>'.
-                            '<input type="hidden" name="_method" value="delete"/>'.
                             '<a class="btn btn-danger btn-sm" title="Eliminar" style="text-decoration: none;"'.
                             '  data-toggle="modal" href="#modalDelete"'.
                             '  data-id="'.$linea->id.'"'.
@@ -278,7 +277,8 @@ class RemitoController extends EntidadConDetalleController
                 $defaultValue = $item->id;
             array_push($selectValues, [
                 'id' => $item->id,
-                'nombre' => $item->nombre
+                'nombre' => $item->nombre,
+                'cantidad' => $item->cantidad
             ]);
         }
         return response()->json([
