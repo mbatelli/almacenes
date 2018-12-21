@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Validation\Rule;
 use App\Http\Controllers\Voyager\VoyagerBaseController;
 use Validator;
 
@@ -10,42 +11,44 @@ class PresentacionController extends VoyagerBaseController
     public function validateBread($request, $data, $name = null, $id = null)
     {
         $rules = [];
-        $messages = [];
-        $customAttributes = [];
+        $messages = [
+            'nombre.unique' => 'El valor del campo Nombre ya está en uso para el Artículo seleccionado.'
+        ];
+        $customAttributes = [
+            'nombre' => 'Nombre',
+            'articulo_id' => 'Artículo',
+            'cantidad' => 'Cantidad',
+            'peso' => 'Peso',
+            'volumen' => 'Volumen',
+        ];
         $is_update = $name && $id;
+        $nombre = $request['nombre'];
+        $articulo_id = $request['articulo_id'];
+        $uniqueNombre = null;
+        
+        if($is_update)
+            $uniqueNombre = Rule::unique('presentacion')->where(function ($query) use($articulo_id, $nombre) {
+                return $query->where('articulo_id', $articulo_id)->where('nombre', $nombre);
+            })->ignore($id);
+        else
+            $uniqueNombre = Rule::unique('presentacion')->where(function ($query) use($articulo_id, $nombre) {
+                return $query->where('articulo_id', $articulo_id)->where('nombre', $nombre);
+            });
 
-        $fieldsWithValidationRules = $this->getFieldsWithValidationRules($data);
-
-        foreach ($fieldsWithValidationRules as $field) {
-            $options = json_decode($field->details);
-            $fieldRules = $options->validation->rule;
-            $fieldName = $field->field;
-
-            // Show the field's display name on the error message
-            if (!empty($field->display_name)) {
-                $customAttributes[$fieldName] = $field->display_name;
-            }
-
-            // Get the rules for the current field whatever the format it is in
-            $rules[$fieldName] = is_array($fieldRules) ? $fieldRules : explode('|', $fieldRules);
-
-            // Fix Unique validation rule on Edit Mode
-            if ($is_update) {
-                foreach ($rules[$fieldName] as &$fieldRule) {
-                    if (strpos(strtoupper($fieldRule), 'UNIQUE') !== false) {
-                        $fieldRule = \Illuminate\Validation\Rule::unique($name)->ignore($id);
-                    }
-                }
-            }
-
-            // Set custom validation messages if any
-            if (!empty($options->validation->messages)) {
-                foreach ($options->validation->messages as $key => $msg) {
-                    $messages["{$fieldName}.{$key}"] = $msg;
-                }
-            }
-        }
-
+        $rules = [
+            'nombre' => [
+                'required',
+                'max:100',
+                $uniqueNombre,
+            ],
+            'articulo_id' => [
+                'required',
+            ],
+            'cantidad' => 'required|integer|gt:0',
+            'peso' => 'required|numeric|gt:0',
+            'volumen' => 'required|numeric|gt:0',
+        ];
+        
         return Validator::make($request, $rules, $messages, $customAttributes);
     }    
 }
