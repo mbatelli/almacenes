@@ -15,7 +15,7 @@ class Destinatario extends Model
 
     protected function listDropDown()
     {
-        return Ciudad::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
+        return Destinatario::whereNull('deleted_at')->orderBy('nombre', 'asc')->get();
     }
     
     /**
