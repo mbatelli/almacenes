@@ -70,7 +70,7 @@
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="0" y="0" width="50" height="16" uuid="8ee3027e-3cab-47fd-8142-a0411770b72a"/>
 				<box topPadding="2" leftPadding="2">
 					<leftPen lineWidth="0.25"/>

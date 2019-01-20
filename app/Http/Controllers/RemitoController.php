@@ -78,16 +78,17 @@ class RemitoController extends EntidadConDetalleController
         }
 
         // Armamos arreglo de datos con info que se usara en el reporte
+        $numero = str_pad($remito->depositoId->punto_venta, 4, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 8, '0', STR_PAD_LEFT);
         $data = [
             'remito' => [
                 'tipo' => $remito->tipo,
-                'numero' => str_pad($remito->depositoId->punto_venta, 3, '0', STR_PAD_LEFT)."-".str_pad($remito->numero, 3, '0', STR_PAD_LEFT),
+                'numero' => $numero,
                 'fecha' => \DateTime::createFromFormat('Y-m-d', $remito->fecha)->format('d/m/Y'),
-                'depositoDireccion' => $remito->depositoId->direccion." ".$remito->depositoId->ciudadId->nombre,
+                'deposito' => $remito->depositoId->nombre." ".$remito->depositoId->direccion." ".$remito->depositoId->ciudadId->nombre,
                 'depositoTelefono' => $remito->depositoId->telefono,
                 'destinatario' => $remito->destinatarioId->nombre,
                 'destinatarioDireccion' => $remito->destinatarioId->direccion." ".$remito->destinatarioId->ciudadId->nombre,
-                'nota' => "El envio consta de ".(is_null($remito->cantidad_bultos)?"0":$remito->cantidad_bultos)." bultos, ".(is_null($remito->peso)?"0":$remito->peso)." Kg y ".(is_null($remito->volumen)?"0":$remito->volumen)." m3. Precintos N°: ".(is_null($remito->precintos)?"":$remito->precintos)." ".(is_null($remito->nota)?"":$remito->nota),
+                'nota' => "El envío consta de ".(is_null($remito->cantidad_bultos)?"0":$remito->cantidad_bultos)." bultos, ".(is_null($remito->peso)?"0":$remito->peso)." Kg y ".(is_null($remito->volumen)?"0":$remito->volumen)." m3. Precintos N°: ".(is_null($remito->precintos)?"":$remito->precintos)." ".(is_null($remito->nota)?"":$remito->nota),
                 'transportador' => $remito->transportador,
                 'patente' => $remito->patente,
                 'conductor' => $remito->conductor,
@@ -117,7 +118,7 @@ class RemitoController extends EntidadConDetalleController
             ]            
         ];
         $jasperName = 'remito';
-        $downloadName = sprintf("Remito %s.pdf", $remito->numero);
+        $downloadName = sprintf("%s %s.pdf", $remito->tipo, $numero);
         return $this->printJasperToPDF($jasperName, $options, $downloadName);
     }
 
